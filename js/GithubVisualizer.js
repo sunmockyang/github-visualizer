@@ -200,7 +200,7 @@ function GVObject () {
 	};
 
 	this.addCamera = function(camera) {
-		this.context = camera.context;
+		this.context = camera.tempContext;
 	};
 
 	this.isPhysicsObject = function () {

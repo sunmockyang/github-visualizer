@@ -1,6 +1,6 @@
 function GVRepo(){
 	this.size = 200;
-	this.gravity = 100;
+	this.gravity = 50;
 	this.repelDist = this.size + 150;
 	this.repelStrength = this.gravity * 20;
 	this.floatStrength = 50000000;
@@ -13,7 +13,7 @@ function GVRepo(){
 
 	this.shape = new b2CircleDef();
 	this.shape.density = 1;
-	this.shape.radius = this.size;
+	this.shape.radius = this.size * .8;
 	this.shape.restitution = 0.1;
 	this.shape.friction = 10;
 
@@ -27,6 +27,7 @@ GVRepo.prototype = new GVObject();
 GVRepo.prototype.getGravityVector = function(from, merged) {
 	var force = new Vector();
 	if (this.pos.sub(from).mag() > this.repelDist || merged){
+		// force = this.pos.sub(from).normalize().multiply(this.gravity);
 		force = this.pos.sub(from).multiply(this.gravity);
 		if (merged){
 			force = force.multiply(2);
@@ -78,7 +79,12 @@ GVRepo.prototype.update = function() {
 };
 
 GVRepo.prototype.draw = function() {
-	this.context.fillStyle = this.colour;
+	
+	var blobGradient = this.context.createRadialGradient(0,0,0.1,0,0,this.size);
+
+			blobGradient.addColorStop(0, 'rgba(237,28,36,0.9)');
+		blobGradient.addColorStop(1, 'rgba(218,28,92,0)');
+	this.context.fillStyle = blobGradient;
 
 	this.context.beginPath();
 	this.context.arc(0, 0, this.size, 0, 2 * Math.PI, false);

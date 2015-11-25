@@ -44,10 +44,8 @@ GVParticle.prototype.draw = function() {
     this.context.translate(0,0);
     this.context.moveTo(0,0);
     this.context.lineTo(this.size * 3, this.size * 3);
-    //console.log(this.speed.x, this.speed.y);
+
 	this.context.stroke();
-	//this.context.arc(0, 0, this.size, 0, 2 * Math.PI, false);
-	//this.context.fill();
 	this.context.closePath();
 
 };
