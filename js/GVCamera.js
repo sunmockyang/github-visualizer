@@ -13,7 +13,6 @@ function GVCamera(context){
 
 GVCamera.prototype.onresize = function() {
 	this.width = this.context.canvas.width = window.innerWidth;
-
 	this.height = this.context.canvas.height = window.innerHeight;
 
 	this.draw();
@@ -51,6 +50,10 @@ GVCamera.prototype.draw = function() {
 		this.drawObjects[i].draw();
 		this.context.restore();
 	};
+};
+
+GVCamera.prototype.getBounds = function() {
+	return new Bounds(this.center.x - this.width/2, this.center.y - this.height/2, this.width, this.height);
 };
 
 GVCamera.prototype.convertWorldToCameraSpace = function(obj) {
