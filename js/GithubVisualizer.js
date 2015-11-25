@@ -39,11 +39,13 @@ function GithubVisualizer(canvas){
 };
 
 GithubVisualizer.prototype.numParticlesInExplosion = 8;
+GithubVisualizer.WORLD_BOUNDS = new Bounds(-10000, -10000, 20000, 20000);
 
 GithubVisualizer.prototype.setupPhysics = function() {
 	var worldAABB = new b2AABB();
-	worldAABB.minVertex.Set(-1000, -1000);
-	worldAABB.maxVertex.Set(2000, 2000);
+	worldAABB.minVertex.Set(GithubVisualizer.WORLD_BOUNDS.left, GithubVisualizer.WORLD_BOUNDS.top);
+	worldAABB.maxVertex.Set(GithubVisualizer.WORLD_BOUNDS.left + GithubVisualizer.WORLD_BOUNDS.width,
+							GithubVisualizer.WORLD_BOUNDS.top + GithubVisualizer.WORLD_BOUNDS.height);
 	var gravity = new b2Vec2(0, 0);
 	var doSleep = false;
 	var world = new b2World(worldAABB, gravity, doSleep);

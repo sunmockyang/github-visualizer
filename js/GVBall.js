@@ -1,16 +1,17 @@
 function GVBall(x, y, mainRepo){
-	this.size = 5 + Math.random() * 10;
+	this.size = 40 + Math.random() * 10;
 	this.mainRepo = mainRepo;
 
 	this.accel = new Vector(0, 0);
 	this.speed = new Vector(0,0);
 	this.pos = new Vector(x, y);
-	this.colour = (new Color(Math.random() * 50 , 0, 0)).toHex();
+	this.colour = "#f79520";
+	this.randomMag = 1000;
 
 	this.shape = new b2CircleDef();
-	this.shape.density = 1.0;
+	this.shape.density = 0.05;
 	this.shape.radius = this.size;
-	this.shape.restitution = 1;
+	this.shape.restitution = 0.1;
 	this.shape.friction = 10;
 
 	this.bodyDef = new b2BodyDef();
@@ -31,7 +32,9 @@ GVBall.prototype.setInput = function(x, y) {
 };
 
 GVBall.prototype.update = function() {
+	var randomForce = new Vector(Math.random() * this.randomMag - this.randomMag/2, Math.random() * this.randomMag - this.randomMag/2);
 	this.body.ApplyForce(this.mainRepo.getGravityVector(this.pos), this.body.GetCenterPosition());
+	this.body.ApplyForce(randomForce, this.body.GetCenterPosition())
 };
 
 GVBall.prototype.draw = function() {

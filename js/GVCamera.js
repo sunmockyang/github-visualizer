@@ -18,7 +18,7 @@ GVCamera.prototype.onresize = function() {
 	this.draw();
 };
 
-GVCamera.prototype.followStrength = 0.0;
+GVCamera.prototype.followStrength = 0.05;
 
 // Push type GVObject
 GVCamera.prototype.addObject = function(obj) {
@@ -37,7 +37,9 @@ GVCamera.prototype.lookAt = function(pos) {
 }
 
 GVCamera.prototype.draw = function() {
-	this.context.clearRect(0, 0, this.width, this.height);
+	// this.context.clearRect(0, 0, this.width, this.height);
+	this.context.fillStyle = "#fff";
+	this.context.fillRect(0, 0, this.width, this.height);
 
 	var follow = (this.followObj != null) ? this.followObj.pos.clone() : this.center;
 	follow = Vector.Lerp(this.center, follow, this.followStrength);

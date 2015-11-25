@@ -1,16 +1,19 @@
 function GVRepo(){
 	this.size = 200;
-	this.gravity = 1000;
+	this.gravity = 500;
+	this.repelDist = this.size + 150;
+	this.repelStrength = this.gravity * 10;
+	this.floatStrength = 50000000;
 
 	this.accel = new Vector(0, 0);
 	this.speed = new Vector(0,0);
 	this.pos = new Vector(500, 500);
-	this.colour = (new Color(255, 255, 50)).toHex();
+	this.colour = "#ef4237";
 
 	this.shape = new b2CircleDef();
-	this.shape.density = 0;
+	this.shape.density = 1;
 	this.shape.radius = this.size;
-	this.shape.restitution = 1;
+	this.shape.restitution = 0.1;
 	this.shape.friction = 10;
 
 	this.bodyDef = new b2BodyDef();
@@ -21,17 +24,53 @@ function GVRepo(){
 GVRepo.prototype = new GVObject();
 
 GVRepo.prototype.getGravityVector = function(from) {
-  	return this.pos.sub(from).multiply(this.gravity);
-};
-
-GVRepo.prototype.setInput = function(x, y) {
-	this.accel.x = x;
-	this.accel.y = y;
-
-	this.accel = this.accel.multiply(this.INPUT_STRENGTH);
+	var force = new Vector();
+	if (this.pos.sub(from).mag() > this.repelDist){
+		force = this.pos.sub(from).multiply(this.gravity);
+	}
+	else {
+		force = this.pos.sub(from).normalize().multiply(-this.repelStrength);
+	}
+  	return force;
 };
 
 GVRepo.prototype.update = function() {
+	// this.setInput(Math.random() - 0.5, Math.random() - 0.5);
+
+	// this.speed = this.speed.add(this.accel);
+	// this.speed.clamp(this.MAX_SPEED, -this.MAX_SPEED);
+	// this.pos = this.pos.add(this.speed);
+
+	// // friction
+	// this.speed = this.speed.multiply(this.FRICTION_STRENGTH);
+	// this.accel = Vector.Zero();
+
+	// this.setPos(this.pos.x, this.pos.y);
+
+	var xForce = 0;
+	var yForce = 0;
+
+	if (this.pos.x > GithubVisualizer.WORLD_BOUNDS.left + GithubVisualizer.WORLD_BOUNDS.width * 0.7) {
+		xForce = -this.floatStrength;
+	}
+	else if (this.pos.x < GithubVisualizer.WORLD_BOUNDS.left + GithubVisualizer.WORLD_BOUNDS.width * 0.3) {
+		xForce = this.floatStrength;
+	}
+	else {
+		xForce = Math.random() * this.floatStrength - this.floatStrength/2;
+	}
+
+	if (this.pos.y > GithubVisualizer.WORLD_BOUNDS.top + GithubVisualizer.WORLD_BOUNDS.height * 0.7) {
+		yForce = -this.floatStrength;
+	}
+	else if (this.pos.y < GithubVisualizer.WORLD_BOUNDS.top + GithubVisualizer.WORLD_BOUNDS.height * 0.3) {
+		yForce = this.floatStrength;
+	}
+	else {
+		yForce = Math.random() * this.floatStrength - this.floatStrength/2;
+	}
+
+	this.body.ApplyForce(new b2Vec2(xForce, yForce), this.body.GetCenterPosition());
 };
 
 GVRepo.prototype.draw = function() {
