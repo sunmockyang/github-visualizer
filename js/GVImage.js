@@ -8,6 +8,13 @@ function GVImage(url){
 
 GVImage.prototype = new GVObject();
 
+GVImage.prototype.getSize = function() {
+	return {
+		width: this.image.width,
+		height: this.image.height
+	}
+};
+
 GVImage.prototype.draw = function() {
 	if (this.readyToDraw){
 		this.context.drawImage(this.image, 0, 0);

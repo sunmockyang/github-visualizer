@@ -4,6 +4,7 @@ function GVRepo(){
 	this.repelDist = this.size + 150;
 	this.repelStrength = this.gravity * 20;
 	this.floatStrength = 50000000;
+	this.name = "The Repository";
 
 	this.accel = new Vector(0, 0);
 	this.speed = new Vector(0,0);

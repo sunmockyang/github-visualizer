@@ -1,6 +1,7 @@
 function GVBall(x, y, mainRepo){
 	this.size = 10 + Math.random() * 10;
 	this.mainRepo = mainRepo;
+	this.id = nextID++;
 
 	this.accel = new Vector(0, 0);
 	this.speed = new Vector(0,0);
@@ -27,6 +28,10 @@ GVBall.prototype = new GVObject();
 GVBall.prototype.INPUT_STRENGTH = 2;
 GVBall.prototype.FRICTION_STRENGTH = 0.9;
 GVBall.prototype.MAX_SPEED = 5;
+
+GVBall.prototype.getName = function() {
+	return "Pull Request #" + this.id;
+}
 
 GVBall.prototype.merge = function() {
 	this.merged = true;

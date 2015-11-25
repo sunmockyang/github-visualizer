@@ -16,8 +16,9 @@ function GithubVisualizer(canvas){
 
 	this.mainRepo = new GVRepo();
 	this.addObject(this.mainRepo);
+	this.addObject(this.logo);
 
-	this.camera.setFollowObject(this.mainRepo);
+	this.camera.setFollowObject(this.mainRepo, true);
 
 	this.drops = [];
 	this.particles = [];
@@ -76,10 +77,30 @@ GithubVisualizer.prototype.createPR = function() {
 	var ball = new GVBall(x, y, this.mainRepo);
 	this.drops.push(ball);
 	this.addObject(ball);
+
+	this.camera.setFollowObject(ball);
+	this.camera.followStrength = 0.1;
 }
 
 GithubVisualizer.prototype.mergePR = function(i) {
 	this.drops[i].merge();
+
+	if (this.camera.followObj == this.drops[i]) {
+		this.setRandomCameraFollow();
+	}
+};
+
+GithubVisualizer.prototype.setRandomCameraFollow = function() {
+	var drop = this.drops[Math.floor(Math.random() * this.drops.length)];
+
+	if (this.camera.followObj != this.mainRepo || drop.merged || Math.random() < 0.7 || this.drops.length == 0) {
+		this.camera.setFollowObject(this.mainRepo);
+		this.camera.followStrength = 0.05;
+	}
+	else {
+		this.camera.setFollowObject(drop);
+		this.camera.followStrength = 0.07;
+	}
 };
 
 GithubVisualizer.prototype.addObject = function(obj) {
@@ -124,18 +145,17 @@ GithubVisualizer.prototype.update = function() {
 			this.particles.splice(i, 1);
 		}
 	};
+
+	this.logo.pos.x = this.mainRepo.pos.x - this.logo.getSize().width/2;
+	this.logo.pos.y = this.mainRepo.pos.y - this.logo.getSize().height/2;
+
+	if (Math.random() < 0.001) {
+		this.setRandomCameraFollow();
+	}
 };
  
 GithubVisualizer.prototype.draw = function() {
 	this.camera.draw();
-
-	if (this.mouse.mouseover) {
-		this.context.strokeStyle = "#0FF"
-		this.context.beginPath();
-		this.context.moveTo(this.canvas.width/2, this.canvas.height/2);
-		this.context.lineTo(this.mouse.x, this.mouse.y);
-		this.context.stroke();
-	}
 };
 
 GithubVisualizer.prototype.run = function(){this.update();this.draw();window.requestAnimationFrame(this.run.bind(this));}
@@ -152,14 +172,18 @@ GithubVisualizer.prototype.onMouseClick = function() {
 	this.createPR();
 };
 
-var nextID = 0;
+var nextID = 32;
 
 function GVObject () {
 	this.context = null;
 	this.body = null;
 	this.bodyDef = null;
 	this.pos = new Vector();
-	this.id = nextID++;
+	this.name = "random object";
+
+	this.getName = function() {
+		return this.name;
+	}
 	
 	this.setPos = function(x, y) {
 		this.pos.x = x;

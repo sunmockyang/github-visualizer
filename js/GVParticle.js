@@ -4,7 +4,7 @@ function GVParticle(x, y, type) {
 	this.pos = new Vector(x, y);
 	this.birthOrDeath = type;
 
-	this.speeds = [[0,-10],[7,-7],[10,0],[7,7],[0,10],[-7,7],[-10,0],[-7,-7]];
+	this.speeds = [[0,-12],[9,-9],[12,0],[9,9],[0,12],[-9,9],[-12,0],[-9,-9]];
 	this.size = 4;
 	this.speed = new Vector(this.speeds[ParticleIndex][0],this.speeds[ParticleIndex][1]);
 	
@@ -27,7 +27,7 @@ GVParticle.prototype.update = function() {
 	this.speed = this.speed.multiply(this.FRICTION_STRENGTH);
 	this.speed.clamp(this.MAX_SPEED, -this.MAX_SPEED);
 	this.pos = this.pos.add(this.speed);
-	this.size = this.size * 0.8;
+	this.size = this.size * 0.95;
 	// this.color = ("hls(" + )
 	//this.accel = Vector.Zero();
 
@@ -40,10 +40,10 @@ GVParticle.prototype.draw = function() {
 	this.context.beginPath();
 
 	this.context.strokeStyle='#ef4237';
-    this.context.lineWidth=2;
+    this.context.lineWidth=4;
     this.context.translate(0,0);
     this.context.moveTo(0,0);
-    this.context.lineTo(this.speed.x, this.speed.y);
+    this.context.lineTo(this.size * 3, this.size * 3);
     //console.log(this.speed.x, this.speed.y);
 	this.context.stroke();
 	//this.context.arc(0, 0, this.size, 0, 2 * Math.PI, false);
