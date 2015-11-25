@@ -23,7 +23,7 @@ function GithubVisualizer(canvas){
 	this.particles = [];
 
 	for (var i = 0; i < 10; i++) {
-		this.createPR();
+		this.createPR(0, 0);
 	};
 
 	// Setup input
@@ -60,28 +60,20 @@ GithubVisualizer.prototype.setupPhysics = function() {
 	return world;
 };
 
-GithubVisualizer.prototype.createPR = function(pullRequest) {
+GithubVisualizer.prototype.createPR = function(x, y) {
+	for (var i = 0; i < this.numParticlesInExplosion; i++) {
+		this.particles.push(new GVParticle(x, y, 1));
+		this.camera.addObject(this.particles[this.particles.length - 1]);
+	};
+
 	var distFromEdge = 100;
 	var screenBounds = this.camera.getBounds();
 	var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
 	var y = (Math.random() > 0.5) ? screenBounds.top : (screenBounds.top + screenBounds.height - distFromEdge);
-
-GithubVisualizer.prototype.onMouseClick = function() {
-	var worldSpace = this.camera.convertCameraToWorldSpace(this.mouse.x, this.mouse.y);
-	this.prBorn(worldSpace.x, worldSpace.y);
-};
-
-GithubVisualizer.prototype.prBorn = function(x, y) {
-	console.log("PR Born");
-	for (var i = 0; i < this.numParticlesInExplosion; i++) {
-		console.log("added Particle");
-		this.particles.push(new GVParticle(x, y, 1));
-		this.camera.addObject(this.particles[this.particles.length - 1]);
-	};
 	var ball = new GVBall(x + Math.random() * distFromEdge, y + Math.random() * distFromEdge, this.mainRepo);
 	this.drops.push(ball);
 	this.addObject(ball);
-};
+}
 
 GithubVisualizer.prototype.addObject = function(obj) {
 	this.camera.addObject(obj);
@@ -142,6 +134,7 @@ GithubVisualizer.prototype.onMouseMove = function() {};
 
 GithubVisualizer.prototype.onMouseClick = function() {
 	var worldSpace = this.camera.convertCameraToWorldSpace(this.mouse.x, this.mouse.y);
+	this.createPR(worldSpace.x, worldSpace.y);
 };
 
 var nextID = 0;
