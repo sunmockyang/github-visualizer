@@ -1,14 +1,14 @@
-function GVBall(x, y, mainRepo){
-	this.size = 5 + Math.random() * 10;
-	this.mainRepo = mainRepo;
+function GVRepo(){
+	this.size = 200;
+	this.gravity = 1000;
 
 	this.accel = new Vector(0, 0);
 	this.speed = new Vector(0,0);
-	this.pos = new Vector(x, y);
-	this.colour = (new Color(Math.random() * 50 , 0, 0)).toHex();
+	this.pos = new Vector(500, 500);
+	this.colour = (new Color(255, 255, 50)).toHex();
 
 	this.shape = new b2CircleDef();
-	this.shape.density = 1.0;
+	this.shape.density = 0;
 	this.shape.radius = this.size;
 	this.shape.restitution = 1;
 	this.shape.friction = 10;
@@ -18,23 +18,23 @@ function GVBall(x, y, mainRepo){
 	this.bodyDef.position.Set(this.pos.x,this.pos.y);
 }
 
-GVBall.prototype = new GVObject();
-GVBall.prototype.INPUT_STRENGTH = 2;
-GVBall.prototype.FRICTION_STRENGTH = 0.9;
-GVBall.prototype.MAX_SPEED = 5;
+GVRepo.prototype = new GVObject();
 
-GVBall.prototype.setInput = function(x, y) {
+GVRepo.prototype.getGravityVector = function(from) {
+  	return this.pos.sub(from).multiply(this.gravity);
+};
+
+GVRepo.prototype.setInput = function(x, y) {
 	this.accel.x = x;
 	this.accel.y = y;
 
 	this.accel = this.accel.multiply(this.INPUT_STRENGTH);
 };
 
-GVBall.prototype.update = function() {
-	this.body.ApplyForce(this.mainRepo.getGravityVector(this.pos), this.body.GetCenterPosition());
+GVRepo.prototype.update = function() {
 };
 
-GVBall.prototype.draw = function() {
+GVRepo.prototype.draw = function() {
 	this.context.fillStyle = this.colour;
 
 	this.context.beginPath();

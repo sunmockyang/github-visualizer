@@ -13,16 +13,16 @@ function GithubVisualizer(canvas){
 	// Setup pLink
 	this.camera = new GVCamera(this.context);
 
+	this.mainRepo = new GVRepo();
+	this.addObject(this.mainRepo);
+
+	this.camera.setFollowObject(this.mainRepo);
+
 	this.drops = [];
 
 	for (var i = 0; i < 10; i++) {
-		this.drops.push(new GVBall());
-		this.addObject(this.drops[i]);
+		this.createPR();
 	};
-
-	this.camera.setFollowObject(this.drops[0]);
-	this.drops[0].colour = new Color(0, 0, 255).toHex();
-	// this.camera.lookAt(this.drops[0].pos);
 
 	// Setup input
 	this.mouse = new LibraryMouse(this.canvas);
@@ -40,26 +40,31 @@ GithubVisualizer.prototype.setupPhysics = function() {
 	var worldAABB = new b2AABB();
 	worldAABB.minVertex.Set(-1000, -1000);
 	worldAABB.maxVertex.Set(2000, 2000);
-	var gravity = new b2Vec2(0, 1000);
+	var gravity = new b2Vec2(0, 0);
 	var doSleep = false;
 	var world = new b2World(worldAABB, gravity, doSleep);
 
 
-	var groundSd = new b2BoxDef();
-	groundSd.extents.Set(1000, 50);
-	groundSd.restitution = 0.2;
-	var groundBd = new b2BodyDef();
-	groundBd.AddShape(groundSd);
-	groundBd.position.Set(0, 700);
-	world.CreateBody(groundBd);
+	// var groundSd = new b2BoxDef();
+	// groundSd.extents.Set(1000, 50);
+	// groundSd.restitution = 0.2;
+	// var groundBd = new b2BodyDef();
+	// groundBd.AddShape(groundSd);
+	// groundBd.position.Set(0, 700);
+	// world.CreateBody(groundBd);
 
 	return world;
 };
 
-GithubVisualizer.prototype.onMouseMove = function() {};
+GithubVisualizer.prototype.createPR = function(pullRequest) {
+	var distFromEdge = 100;
+	var screenBounds = this.camera.getBounds();
+	var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
+	var y = (Math.random() > 0.5) ? screenBounds.top : (screenBounds.top + screenBounds.height - distFromEdge);
 
-GithubVisualizer.prototype.onMouseClick = function() {
-	var worldSpace = this.camera.convertCameraToWorldSpace(this.mouse.x, this.mouse.y);
+	var ball = new GVBall(x + Math.random() * distFromEdge, y + Math.random() * distFromEdge, this.mainRepo);
+	this.drops.push(ball);
+	this.addObject(ball);
 };
 
 GithubVisualizer.prototype.addObject = function(obj) {
@@ -71,18 +76,26 @@ GithubVisualizer.prototype.addObject = function(obj) {
 };
 
 GithubVisualizer.prototype.update = function() {
-	this.world.Step(1.0/60, 1);
-
-	if (this.mouse.clicked) {
-		this.drops[0].setInput((this.mouse.x - this.canvas.width/2) / 1000, (this.mouse.y - this.canvas.height/2) / 1000);
-	}
-
-	for (var i = 1; i < this.drops.length; i++) {
-		this.drops[i].setInput(Math.random() - 0.5, Math.random() - 0.5)
-	};
+	this.mainRepo.update();
 
 	for (var i = 0; i < this.drops.length; i++) {
 		this.drops[i].update();
+	};
+
+	this.world.Step(1.0/60, 1);
+
+	// if (this.mouse.clicked) {
+	// 	this.drops[0].setInput((this.mouse.x - this.canvas.width/2) / 1000, (this.mouse.y - this.canvas.height/2) / 1000);
+	// }
+
+	// for (var i = 1; i < this.drops.length; i++) {
+	// 	this.drops[i].setInput(Math.random() - 0.5, Math.random() - 0.5)
+	// };
+	
+	this.mainRepo.postUpdate();
+
+	for (var i = 0; i < this.drops.length; i++) {
+		this.drops[i].postUpdate();
 	};
 };
  
@@ -104,6 +117,13 @@ window.requestAnimationFrame = window.requestAnimationFrame ||
 	window.webkitRequestAnimationFrame ||
 	window.msRequestAnimationFrame;
 
+// Event handlers
+GithubVisualizer.prototype.onMouseMove = function() {};
+
+GithubVisualizer.prototype.onMouseClick = function() {
+	var worldSpace = this.camera.convertCameraToWorldSpace(this.mouse.x, this.mouse.y);
+};
+
 var nextID = 0;
 
 function GVObject () {
@@ -112,6 +132,16 @@ function GVObject () {
 	this.bodyDef = null;
 	this.pos = new Vector();
 	this.id = nextID++;
+	
+	this.setPos = function(x, y) {
+		this.pos.x = x;
+		this.pos.y = y;
+
+		if (this.isPhysicsObject()) {
+			this.body.SetCenterPosition(new b2Vec2(x, y));
+			this.body.WakeUp()
+		}
+	}
 
 	this.draw = function() {
 		console.error("IMPLEMENT A DRAW FUNCTION");
@@ -123,5 +153,12 @@ function GVObject () {
 
 	this.isPhysicsObject = function () {
 		return (this.bodyDef) ? true : false;
+	};
+
+	this.postUpdate = function () {
+		if (this.isPhysicsObject()) {
+			this.pos.x = this.body.GetCenterPosition().x;
+			this.pos.y = this.body.GetCenterPosition().y;
+		}
 	};
 }

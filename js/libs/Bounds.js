@@ -1,6 +1,6 @@
-function Bounds(top, left, width, height){
-	this.top = (top) ? top : 0;
+function Bounds(left, top, width, height){
 	this.left = (left) ? left : 0;
+	this.top = (top) ? top : 0;
 	this.width = (width) ? width : 0;
 	this.height = (height) ? height : 0;
 }
