@@ -22,9 +22,7 @@ function GithubVisualizer(canvas){
 	this.drops = [];
 	this.particles = [];
 
-	for (var i = 0; i < 10; i++) {
-		this.createPR(0, 0);
-	};
+	this.client = new GVClient(this.drops, this.createPR.bind(this), this.mergePR.bind(this));
 
 	// Setup input
 	this.mouse = new LibraryMouse(this.canvas);
@@ -62,20 +60,27 @@ GithubVisualizer.prototype.setupPhysics = function() {
 	return world;
 };
 
-GithubVisualizer.prototype.createPR = function(x, y) {
+GithubVisualizer.prototype.createPR = function() {
+	var distFromEdge = 200;
+	var screenBounds = this.camera.getBounds();
+	var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
+	var y = (Math.random() > 0.5) ? screenBounds.top : (screenBounds.top + screenBounds.height - distFromEdge);
+
+	x += Math.random() * distFromEdge;
+	y+= Math.random() * distFromEdge;
 	for (var i = 0; i < this.numParticlesInExplosion; i++) {
 		this.particles.push(new GVParticle(x, y, 1));
 		this.camera.addObject(this.particles[this.particles.length - 1]);
 	};
 
-	var distFromEdge = 100;
-	var screenBounds = this.camera.getBounds();
-	var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
-	var y = (Math.random() > 0.5) ? screenBounds.top : (screenBounds.top + screenBounds.height - distFromEdge);
-	var ball = new GVBall(x + Math.random() * distFromEdge, y + Math.random() * distFromEdge, this.mainRepo);
+	var ball = new GVBall(x, y, this.mainRepo);
 	this.drops.push(ball);
 	this.addObject(ball);
 }
+
+GithubVisualizer.prototype.mergePR = function(i) {
+	this.drops[i].merge();
+};
 
 GithubVisualizer.prototype.addObject = function(obj) {
 	this.camera.addObject(obj);
@@ -106,10 +111,18 @@ GithubVisualizer.prototype.update = function() {
 
 	for (var i = 0; i < this.drops.length; i++) {
 		this.drops[i].postUpdate();
+		if (this.drops[i].size <= 0) {
+			this.world.DestroyBody(this.drops[i].body);
+			this.drops.splice(i, 1);
+		}
 	};
 
 	for (var i = 0; i < this.particles.length; i++) {
 		this.particles[i].update();
+		// Delete particles
+		if (this.particles[i].size <= 0) {
+			this.particles.splice(i, 1);
+		}
 	};
 };
  
@@ -136,7 +149,7 @@ GithubVisualizer.prototype.onMouseMove = function() {};
 
 GithubVisualizer.prototype.onMouseClick = function() {
 	var worldSpace = this.camera.convertCameraToWorldSpace(this.mouse.x, this.mouse.y);
-	this.createPR(worldSpace.x, worldSpace.y);
+	this.createPR();
 };
 
 var nextID = 0;

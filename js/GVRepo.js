@@ -1,8 +1,8 @@
 function GVRepo(){
 	this.size = 200;
-	this.gravity = 500;
+	this.gravity = 100;
 	this.repelDist = this.size + 150;
-	this.repelStrength = this.gravity * 10;
+	this.repelStrength = this.gravity * 20;
 	this.floatStrength = 50000000;
 
 	this.accel = new Vector(0, 0);
@@ -23,10 +23,13 @@ function GVRepo(){
 
 GVRepo.prototype = new GVObject();
 
-GVRepo.prototype.getGravityVector = function(from) {
+GVRepo.prototype.getGravityVector = function(from, merged) {
 	var force = new Vector();
-	if (this.pos.sub(from).mag() > this.repelDist){
+	if (this.pos.sub(from).mag() > this.repelDist || merged){
 		force = this.pos.sub(from).multiply(this.gravity);
+		if (merged){
+			force = force.multiply(2);
+		}
 	}
 	else {
 		force = this.pos.sub(from).normalize().multiply(-this.repelStrength);
