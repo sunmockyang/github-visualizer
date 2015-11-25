@@ -19,7 +19,7 @@ GVCamera.prototype.onresize = function() {
 	this.draw();
 };
 
-GVCamera.prototype.followStrength = 0.04;
+GVCamera.prototype.followStrength = 0.0;
 
 // Push type GVObject
 GVCamera.prototype.addObject = function(obj) {

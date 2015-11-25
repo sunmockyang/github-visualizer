@@ -12,8 +12,10 @@ function GithubVisualizer(canvas){
 
 	// Setup pLink
 	this.camera = new GVCamera(this.context);
+	this.logo = new GVImage("img/youilogo.png");
 
 	this.drops = [];
+	this.particles = [];
 
 	for (var i = 0; i < 10; i++) {
 		this.drops.push(new GVBall());
@@ -35,6 +37,8 @@ function GithubVisualizer(canvas){
 
 	this.run();
 };
+
+GithubVisualizer.prototype.numParticlesInExplosion = 8;
 
 GithubVisualizer.prototype.setupPhysics = function() {
 	var worldAABB = new b2AABB();
@@ -60,6 +64,16 @@ GithubVisualizer.prototype.onMouseMove = function() {};
 
 GithubVisualizer.prototype.onMouseClick = function() {
 	var worldSpace = this.camera.convertCameraToWorldSpace(this.mouse.x, this.mouse.y);
+	this.prBorn(worldSpace.x, worldSpace.y);
+};
+
+GithubVisualizer.prototype.prBorn = function(x, y) {
+	console.log("PR Born");
+	for (var i = 0; i < this.numParticlesInExplosion; i++) {
+		console.log("added Particle");
+		this.particles.push(new GVParticle(x, y, 1));
+		this.camera.addObject(this.particles[this.particles.length - 1]);
+	};
 };
 
 GithubVisualizer.prototype.addObject = function(obj) {
@@ -83,6 +97,10 @@ GithubVisualizer.prototype.update = function() {
 
 	for (var i = 0; i < this.drops.length; i++) {
 		this.drops[i].update();
+	};
+
+	for (var i = 0; i < this.particles.length; i++) {
+		this.particles[i].update();
 	};
 };
  
