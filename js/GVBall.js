@@ -1,7 +1,8 @@
 function GVBall(x, y, mainRepo){
-	this.size = 10 + Math.random() * 10;
+	this.size = 0;
 	this.mainRepo = mainRepo;
 	this.id = nextID++;
+	this.status = "open";
 
 	this.accel = new Vector(0, 0);
 	this.speed = new Vector(0,0);
@@ -11,7 +12,7 @@ function GVBall(x, y, mainRepo){
 
 	this.shape = new b2CircleDef();
 	this.shape.density = 0.05;
-	this.shape.radius = this.size;
+	this.shape.radius = 20 + Math.random() * 10;
 	this.shape.restitution = 0.1;
 	this.shape.friction = 10;
 
@@ -21,28 +22,36 @@ function GVBall(x, y, mainRepo){
 
 	this.merged = false;
 
-	this.anim = function() {};
+	this.anim = function() {
+		this.size = Mathx.Lerp(this.size, this.shape.radius, 0.02);
+		if (this.shape.radius - this.size < 0.05){
+			this.size = this.shape.radius;
+			this.anim = function() {};
+		}
+	};
 }
 
 GVBall.prototype = new GVObject();
 GVBall.prototype.INPUT_STRENGTH = 2;
 GVBall.prototype.FRICTION_STRENGTH = 0.9;
 GVBall.prototype.MAX_SPEED = 5;
+GVBall.prototype.DRAW_TEXT = true;
 
 GVBall.prototype.getName = function() {
-	return "Pull Request #" + this.id;
+	return "Pull Request #" + this.id + ": " + this.status;
 }
 
 GVBall.prototype.merge = function() {
 	this.merged = true;
-	this.colour = "#00FFBB";
+	this.colour = "#00DD99";
 
 	setTimeout((function(){
 			this.anim = function() {
 			this.size = Math.max(0, this.size - 0.5);
 		}
 	}).bind(this), 2000);
-	
+
+	this.status = "merged";
 };
 
 GVBall.prototype.setInput = function(x, y) {
@@ -63,6 +72,24 @@ GVBall.prototype.update = function() {
 GVBall.prototype.draw = function() {
 	this.context.fillStyle = this.colour;
 
+	this.context.beginPath();
+	this.context.arc(0, 0, this.size, 0, 2 * Math.PI, false);
+	this.context.fill();
+	this.context.closePath();
+
+	if (this.DRAW_TEXT){
+		this.context.font = Math.floor(this.size/1.5) + "px GothamSsm";
+		var text = "#" + this.id;
+		var width = this.context.measureText(text).width;
+		var left = (this.pos.x - width) / 2 + this.pos.x;
+		var top = this.pos.y - 10;
+		this.context.textBaseline = "hanging";
+		this.context.fillStyle = "#FFFFFF";
+		this.context.fillText(text, -width/2, -this.size/5);
+	}
+};
+
+GVBall.prototype.drawShadow = function() {
 	this.context.beginPath();
 	this.context.arc(0, 0, this.size, 0, 2 * Math.PI, false);
 	this.context.fill();

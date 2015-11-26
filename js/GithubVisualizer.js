@@ -11,19 +11,21 @@ function GithubVisualizer(canvas){
 	this.world = this.setupPhysics();
 
 	// Setup pLink
-	this.camera = new GVCamera(this.context);
-	this.logo = new GVImage("img/youilogo.png");
-
 	this.mainRepo = new GVRepo();
+	this.camera = new GVCamera(this.context, this.mainRepo);
+	
+	this.logo = new GVImage("img/youilogo.png");
 	this.addObject(this.mainRepo);
 	this.addObject(this.logo);
 
+	this.drops = [];
+	this.comments = [];
+	this.particles = [];
 	this.camera.setFollowObject(this.mainRepo, true);
 
-	this.drops = [];
-	this.particles = [];
+	this.client = new GVClient(this.drops, this.createPR.bind(this), this.mergePR.bind(this), this.comment.bind(this));
 
-	this.client = new GVClient(this.drops, this.createPR.bind(this), this.mergePR.bind(this));
+	this.camera.setFollowObject(this.mainRepo, true);
 
 	// Setup input
 	this.mouse = new LibraryMouse(this.canvas);
@@ -61,6 +63,20 @@ GithubVisualizer.prototype.setupPhysics = function() {
 	return world;
 };
 
+GithubVisualizer.prototype.comment = function(i) {
+	for (var i = 0; i < 100; i++) {
+		var distFromEdge = -200;
+		var screenBounds = this.camera.getBounds();
+		var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
+		var y = (Math.random() > 0.5) ? screenBounds.top : (screenBounds.top + screenBounds.height - distFromEdge);
+		var boid = new GVBoid(x, y, this.drops[Math.floor(Math.random() * this.drops.length)], this.comments);
+		this.comments.push(boid);
+		this.addObject(boid);
+
+		this.camera.setFollowObject(boid);
+	};
+};
+
 GithubVisualizer.prototype.createPR = function() {
 	var distFromEdge = 200;
 	var screenBounds = this.camera.getBounds();
@@ -79,28 +95,28 @@ GithubVisualizer.prototype.createPR = function() {
 	this.addObject(ball);
 
 	this.camera.setFollowObject(ball);
-	this.camera.followStrength = 0.1;
+	this.camera.followStrength = 0.08;
 }
 
 GithubVisualizer.prototype.mergePR = function(i) {
-	this.drops[i].merge();
-
-	if (this.camera.followObj == this.drops[i]) {
-		this.setRandomCameraFollow();
+	if (this.drops.length > i)
+	{
+		this.camera.setFollowObject(this.drops[i]);
+		this.drops[i].merge();
 	}
 };
 
 GithubVisualizer.prototype.setRandomCameraFollow = function() {
 	var drop = this.drops[Math.floor(Math.random() * this.drops.length)];
 
-	if (this.camera.followObj != this.mainRepo || drop.merged || Math.random() < 0.7 || this.drops.length == 0) {
+	if (!this.camera.followObj || this.camera.followObj != this.mainRepo || this.drops.length == 0 || drop.size < 1) {
 		this.camera.setFollowObject(this.mainRepo);
-		this.camera.followStrength = 0.05;
+		this.camera.followStrength = 0.07;
 	}
 	else {
 		this.camera.setFollowObject(drop);
-		this.camera.followStrength = 0.07;
-	}
+		this.camera.followStrength = 0.08;
+	} 
 };
 
 GithubVisualizer.prototype.addObject = function(obj) {
@@ -133,6 +149,15 @@ GithubVisualizer.prototype.update = function() {
 	for (var i = 0; i < this.drops.length; i++) {
 		this.drops[i].postUpdate();
 		if (this.drops[i].size <= 0) {
+			if (this.camera.followObj == this.drops[i]) {
+				this.setRandomCameraFollow();
+			}
+			var x = this.drops[i].pos.x;
+			var y = this.drops[i].pos.y;
+			for (var j = 0; j < this.numParticlesInExplosion; j++) {
+				this.particles.push(new GVParticle(x, y, 1));
+				this.camera.addObject(this.particles[this.particles.length - 1]);
+			};
 			this.world.DestroyBody(this.drops[i].body);
 			this.drops.splice(i, 1);
 		}
@@ -141,15 +166,26 @@ GithubVisualizer.prototype.update = function() {
 	for (var i = 0; i < this.particles.length; i++) {
 		this.particles[i].update();
 		// Delete particles
-		if (this.particles[i].size <= 0) {
+		if (this.particles[i].size <= 0.5) {
+
+			this.camera.removeObject(this.particles[i]);
 			this.particles.splice(i, 1);
+		}
+	};
+
+	for (var i = 0; i < this.comments.length; i++) {
+		this.comments[i].update();
+		// Delete comments
+		if (this.comments[i].size <= 0.1) {
+			this.camera.removeObject(this.comments[i]);
+			this.comments.splice(i, 1);
 		}
 	};
 
 	this.logo.pos.x = this.mainRepo.pos.x - this.logo.getSize().width/2;
 	this.logo.pos.y = this.mainRepo.pos.y - this.logo.getSize().height/2;
 
-	if (Math.random() < 0.001) {
+	if (Math.random() < 0.001 || !this.camera.followObj) {
 		this.setRandomCameraFollow();
 	}
 };
@@ -180,6 +216,7 @@ function GVObject () {
 	this.bodyDef = null;
 	this.pos = new Vector();
 	this.name = "random object";
+	this.colour = "#000000";
 
 	this.getName = function() {
 		return this.name;
@@ -198,6 +235,8 @@ function GVObject () {
 	this.draw = function() {
 		console.error("IMPLEMENT A DRAW FUNCTION");
 	};
+
+	this.drawShadow = function () {};
 
 	this.addCamera = function(camera) {
 		this.context = camera.context;

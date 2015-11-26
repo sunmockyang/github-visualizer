@@ -59,7 +59,14 @@ Vector.prototype.clampMag = function(max, min) {
 
 Vector.prototype.normalize = function() {
 	var mag = this.mag();
-	return new Vector(this.x/mag, this.y/mag);
+	if (mag > 0){
+		return new Vector(this.x/mag, this.y/mag);
+	}
+	return new Vector();
+};
+
+Vector.prototype.apply = function(func) {
+	return new Vector(func(this.x), func(this.y));
 };
 
 Vector.prototype.zeroify = function() {

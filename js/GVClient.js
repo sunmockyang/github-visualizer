@@ -1,6 +1,7 @@
-function GVClient (pullRequests, onPRCreate, onPRMerge) {
+function GVClient (pullRequests, onPRCreate, onPRMerge, onComment) {
 	this.onPRCreate = onPRCreate;	
 	this.onPRMerge = onPRMerge;
+	this.onComment = onComment;
 	this.pullRequests = pullRequests;
 
 	this.checkInterval = 100;
@@ -24,7 +25,13 @@ GVClient.prototype.keyPress = function(e) {
 			this.onPRCreate();
 		}
 		else if (charCode == 13){
-		this.onPRMerge(Math.floor(this.pullRequests.length * Math.random()));
+			this.onPRMerge(Math.floor(this.pullRequests.length * Math.random()));
+		}
+		else if (charCode == 98){
+			this.onComment(Math.floor(this.pullRequests.length * Math.random()));
+		}
+		else {
+			console.log(charCode);
 		}
 	}
 };

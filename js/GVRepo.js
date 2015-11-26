@@ -1,8 +1,8 @@
 function GVRepo(){
 	this.size = 200;
 	this.gravity = 100;
-	this.repelDist = this.size + 150;
-	this.repelStrength = this.gravity * 20;
+	this.repelDist = this.size + 175;
+	this.repelStrength = this.gravity * 30;
 	this.floatStrength = 50000000;
 	this.name = "The Repository";
 
@@ -26,8 +26,9 @@ GVRepo.prototype = new GVObject();
 
 GVRepo.prototype.getGravityVector = function(from, merged) {
 	var force = new Vector();
-	if (this.pos.sub(from).mag() > this.repelDist || merged){
-		force = this.pos.sub(from).multiply(this.gravity);
+	var delta = this.pos.sub(from);
+	if (delta.mag() > this.repelDist || merged){
+		force = delta.multiply(this.gravity);
 		if (merged){
 			force = force.multiply(2);
 		}
@@ -55,20 +56,20 @@ GVRepo.prototype.update = function() {
 	var yForce = 0;
 
 	if (this.pos.x > GithubVisualizer.WORLD_BOUNDS.left + GithubVisualizer.WORLD_BOUNDS.width * 0.7) {
-		xForce = -this.floatStrength;
+		xForce = -this.floatStrength / 2;
 	}
 	else if (this.pos.x < GithubVisualizer.WORLD_BOUNDS.left + GithubVisualizer.WORLD_BOUNDS.width * 0.3) {
-		xForce = this.floatStrength;
+		xForce = this.floatStrength /2;
 	}
 	else {
 		xForce = Math.random() * this.floatStrength - this.floatStrength/2;
 	}
 
 	if (this.pos.y > GithubVisualizer.WORLD_BOUNDS.top + GithubVisualizer.WORLD_BOUNDS.height * 0.7) {
-		yForce = -this.floatStrength;
+		yForce = -this.floatStrength / 2;
 	}
 	else if (this.pos.y < GithubVisualizer.WORLD_BOUNDS.top + GithubVisualizer.WORLD_BOUNDS.height * 0.3) {
-		yForce = this.floatStrength;
+		yForce = this.floatStrength / 2;
 	}
 	else {
 		yForce = Math.random() * this.floatStrength - this.floatStrength/2;
@@ -80,6 +81,13 @@ GVRepo.prototype.update = function() {
 GVRepo.prototype.draw = function() {
 	this.context.fillStyle = this.colour;
 
+	this.context.beginPath();
+	this.context.arc(0, 0, this.size, 0, 2 * Math.PI, false);
+	this.context.fill();
+	this.context.closePath();
+};
+
+GVRepo.prototype.drawShadow = function() {
 	this.context.beginPath();
 	this.context.arc(0, 0, this.size, 0, 2 * Math.PI, false);
 	this.context.fill();

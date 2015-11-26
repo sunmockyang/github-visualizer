@@ -1,15 +1,19 @@
-function GVCamera(context){
+function GVCamera(context, defaultFollowObj){
 	this.context = context;
 	this.width = 300;
 	this.height = 300;
 
 	this.center = new Vector(0,0);
+	this.defaultFollowObj = defaultFollowObj;
 	this.followObj = null;
 	this.drawObjects = [];
 
 	window.onresize = this.onresize.bind(this);
 	this.onresize();
 	this.setRandomColour();
+
+	this.shadowColour = "rgba(0, 0, 0, 0.15)";
+	this.shadowDistance = 4;
 }
 
 GVCamera.prototype.setRandomColour = function() {
@@ -29,6 +33,18 @@ GVCamera.prototype.followStrength = 0.05;
 GVCamera.prototype.addObject = function(obj) {
 	obj.addCamera(this);
 	this.drawObjects.push(obj);
+};
+
+GVCamera.prototype.removeObject = function(obj) {
+	for (var i = 0; i < this.drawObjects.length; i++) {
+		if (this.drawObjects[i] == obj) {
+			this.drawObjects.splice(i, 1);
+			break;
+		}
+	};
+	if (obj == this.followObj){
+		this.followObj = this.defaultFollowObj;
+	}
 };
 
 GVCamera.prototype.setFollowObject = function(obj, forceFollow) {
@@ -54,7 +70,16 @@ GVCamera.prototype.draw = function() {
 	this.center = follow;
 	follow = follow.sub(new Vector(this.width/2, this.height/2));
 
+	this.context.fillStyle = this.shadowColour;
 	for (var i = 0; i < this.drawObjects.length; i++) {
+		this.context.save();
+		this.context.translate(this.drawObjects[i].pos.x - follow.x + this.shadowDistance, this.drawObjects[i].pos.y - follow.y + this.shadowDistance)
+		this.drawObjects[i].drawShadow();
+		this.context.restore();
+	};
+
+	for (var i = 0; i < this.drawObjects.length; i++) {
+		this.context.fillStyle = this.shadowColour;
 		this.context.save();
 		this.context.translate(this.drawObjects[i].pos.x - follow.x, this.drawObjects[i].pos.y - follow.y)
 		this.drawObjects[i].draw();
@@ -63,13 +88,24 @@ GVCamera.prototype.draw = function() {
 
 	if (this.followObj) {
 		this.context.font = "20px GothamSsm";
-		this.context.fillStyle = this.textStyle;
 		var text = (this.followObj.getName());
 
-		var left = (this.width - this.context.measureText(text).width) / 2;
+		var width = this.context.measureText(text).width;
+		var left = (this.width - width) / 2;
+		var top = this.height - 102;
 
+		this.context.fillStyle = this.shadowColour;
+		this.context.fillRect(left - 10 + this.shadowDistance, top - 10 + this.shadowDistance, width + 20, 40);
+
+		this.context.fillStyle = "#FFF";
+		this.context.fillRect(left - 10, top - 10, width + 20, 40);
+
+		this.context.textBaseline = "hanging";
+		this.context.fillStyle = this.followObj.colour;
 		this.context.fillText(text, left, this.height - 100);
 	}
+
+	this.shadowDistance = (Math.sin((new Date()).getTime() / 10000) + 1) * 4 + 2;
 };
 
 GVCamera.prototype.getBounds = function() {

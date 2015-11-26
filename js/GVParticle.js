@@ -1,6 +1,6 @@
 var ParticleIndex = 0;
 
-function GVParticle(x, y, type) {
+function GVParticle(x, y, type, color) {
 	this.pos = new Vector(x, y);
 	this.birthOrDeath = type;
 
@@ -14,7 +14,7 @@ function GVParticle(x, y, type) {
 
 	ParticleIndex = (ParticleIndex + 1) % this.speeds.length;
 	//this.accel = new Vector(0,0);
-	this.color = '#ef4237';
+	this.color = (color) ? color : '#ef4237';
 }
 
 GVParticle.prototype = new GVObject();
@@ -39,11 +39,12 @@ GVParticle.prototype.draw = function() {
 
 	this.context.beginPath();
 
-	this.context.strokeStyle='#ef4237';
+	this.context.strokeStyle=this.color;
     this.context.lineWidth=4;
     this.context.translate(0,0);
     this.context.moveTo(0,0);
-    this.context.lineTo(this.size * 3, this.size * 3);
+	this.context.rotate(Math.atan2(this.speed.y, this.speed.x) + Math.PI/2);
+    this.context.lineTo(0, this.size * 10);
     //console.log(this.speed.x, this.speed.y);
 	this.context.stroke();
 	//this.context.arc(0, 0, this.size, 0, 2 * Math.PI, false);
