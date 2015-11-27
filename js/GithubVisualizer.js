@@ -13,17 +13,18 @@ function GithubVisualizer(canvas){
 	// Setup pLink
 	this.mainRepo = new GVRepo();
 	this.camera = new GVCamera(this.context, this.mainRepo);
-	
-	this.logo = new GVImage("img/youilogo.png");
 	this.addObject(this.mainRepo);
-	this.addObject(this.logo);
+	
 
 	this.drops = [];
-	this.comments = [];
+	this.boids = [];
 	this.particles = [];
 	this.camera.setFollowObject(this.mainRepo, true);
 
-	this.client = new GVClient(this.drops, this.createPR.bind(this), this.mergePR.bind(this), this.comment.bind(this));
+	this.client = new GVClient(this.drops, this.setMainBallAttr.bind(this), this.createBall.bind(this), this.mergeBall.bind(this), this.setBallAttributes.bind(this), this.createBoid.bind(this));
+
+	this.logo = new GVImage(this.client.imageURL);
+	this.addObject(this.logo);
 
 	this.camera.setFollowObject(this.mainRepo, true);
 
@@ -51,33 +52,26 @@ GithubVisualizer.prototype.setupPhysics = function() {
 	var doSleep = false;
 	var world = new b2World(worldAABB, gravity, doSleep);
 
-
-	// var groundSd = new b2BoxDef();
-	// groundSd.extents.Set(1000, 50);
-	// groundSd.restitution = 0.2;
-	// var groundBd = new b2BodyDef();
-	// groundBd.AddShape(groundSd);
-	// groundBd.position.Set(0, 700);
-	// world.CreateBody(groundBd);
-
 	return world;
 };
 
-GithubVisualizer.prototype.comment = function(i) {
-	for (var i = 0; i < 100; i++) {
-		var distFromEdge = -200;
-		var screenBounds = this.camera.getBounds();
-		var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
-		var y = (Math.random() > 0.5) ? screenBounds.top : (screenBounds.top + screenBounds.height - distFromEdge);
-		var boid = new GVBoid(x, y, this.drops[Math.floor(Math.random() * this.drops.length)], this.comments);
-		this.comments.push(boid);
-		this.addObject(boid);
-
-		this.camera.setFollowObject(boid);
-	};
+GithubVisualizer.prototype.setMainBallAttr = function(attr) {
+	this.mainRepo.setAttributes(attr);
 };
 
-GithubVisualizer.prototype.createPR = function() {
+GithubVisualizer.prototype.createBoid = function(id, colour, name) {
+	var distFromEdge = -200;
+	var screenBounds = this.camera.getBounds();
+	var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
+	var y = (Math.random() > 0.5) ? screenBounds.top : (screenBounds.top + screenBounds.height - distFromEdge);
+	var boid = new GVBoid(x, y, this.findBallByID(id), colour, name, this.boids);
+	this.boids.push(boid);
+	this.addObject(boid);
+
+	this.camera.setFollowObject(boid);
+};
+
+GithubVisualizer.prototype.createBall = function(id, status, colour, size) {
 	var distFromEdge = 200;
 	var screenBounds = this.camera.getBounds();
 	var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
@@ -90,20 +84,42 @@ GithubVisualizer.prototype.createPR = function() {
 		this.camera.addObject(this.particles[this.particles.length - 1]);
 	};
 
-	var ball = new GVBall(x, y, this.mainRepo);
+	var ball = new GVBall(this.world, x, y, this.mainRepo, id, status, colour, size);
 	this.drops.push(ball);
 	this.addObject(ball);
 
 	this.camera.setFollowObject(ball);
 	this.camera.followStrength = 0.08;
+
+	return ball;
 }
 
-GithubVisualizer.prototype.mergePR = function(i) {
-	if (this.drops.length > i)
-	{
-		this.camera.setFollowObject(this.drops[i]);
-		this.drops[i].merge();
+GithubVisualizer.prototype.setBallAttributes = function(id, attr) {
+	var ball = this.findBallByID(id);
+
+	if (ball){
+		ball.setAttributes(attr);
 	}
+};
+
+GithubVisualizer.prototype.mergeBall = function(id) {
+	var ball = this.findBallByID(id);
+	if (ball)
+	{
+		this.camera.setFollowObject(ball);
+		ball.merge();
+	}
+};
+
+GithubVisualizer.prototype.findBallByID = function(id) {
+	// Find ball
+	var ball = null;
+	for (var i = 0; i < this.drops.length; i++) {
+		if (this.drops[i].id == id){
+			ball = this.drops[i];
+		}
+	};
+	return ball;
 };
 
 GithubVisualizer.prototype.setRandomCameraFollow = function() {
@@ -132,22 +148,6 @@ GithubVisualizer.prototype.update = function() {
 
 	for (var i = 0; i < this.drops.length; i++) {
 		this.drops[i].update();
-	};
-
-	this.world.Step(1.0/60, 1);
-
-	// if (this.mouse.clicked) {
-	// 	this.drops[0].setInput((this.mouse.x - this.canvas.width/2) / 1000, (this.mouse.y - this.canvas.height/2) / 1000);
-	// }
-
-	// for (var i = 1; i < this.drops.length; i++) {
-	// 	this.drops[i].setInput(Math.random() - 0.5, Math.random() - 0.5)
-	// };
-	
-	this.mainRepo.postUpdate();
-
-	for (var i = 0; i < this.drops.length; i++) {
-		this.drops[i].postUpdate();
 		if (this.drops[i].size <= 0) {
 			if (this.camera.followObj == this.drops[i]) {
 				this.setRandomCameraFollow();
@@ -163,6 +163,14 @@ GithubVisualizer.prototype.update = function() {
 		}
 	};
 
+	this.world.Step(1.0/60, 1);
+
+	this.mainRepo.postUpdate();
+
+	for (var i = 0; i < this.drops.length; i++) {
+		this.drops[i].postUpdate();
+	};
+
 	for (var i = 0; i < this.particles.length; i++) {
 		this.particles[i].update();
 		// Delete particles
@@ -173,12 +181,12 @@ GithubVisualizer.prototype.update = function() {
 		}
 	};
 
-	for (var i = 0; i < this.comments.length; i++) {
-		this.comments[i].update();
-		// Delete comments
-		if (this.comments[i].size <= 0.1) {
-			this.camera.removeObject(this.comments[i]);
-			this.comments.splice(i, 1);
+	for (var i = 0; i < this.boids.length; i++) {
+		this.boids[i].update();
+		// Delete boids
+		if (this.boids[i].size <= 0.1) {
+			this.camera.removeObject(this.boids[i]);
+			this.boids.splice(i, 1);
 		}
 	};
 
@@ -203,12 +211,7 @@ window.requestAnimationFrame = window.requestAnimationFrame ||
 // Event handlers
 GithubVisualizer.prototype.onMouseMove = function() {};
 
-GithubVisualizer.prototype.onMouseClick = function() {
-	var worldSpace = this.camera.convertCameraToWorldSpace(this.mouse.x, this.mouse.y);
-	this.createPR();
-};
-
-var nextID = 32;
+GithubVisualizer.prototype.onMouseClick = function() {};
 
 function GVObject () {
 	this.context = null;

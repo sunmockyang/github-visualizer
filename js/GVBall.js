@@ -1,18 +1,21 @@
-function GVBall(x, y, mainRepo){
+// Optional set by input - id, status, colour, size
+
+function GVBall(world, x, y, mainRepo, id, status, colour, size){
 	this.size = 0;
 	this.mainRepo = mainRepo;
-	this.id = nextID++;
-	this.status = "open";
+	this.id = (id) ? id : 0;
+	this.status = (status) ? status : "open";
+	this.world = world;
 
 	this.accel = new Vector(0, 0);
 	this.speed = new Vector(0,0);
 	this.pos = new Vector(x, y);
-	this.colour = "#f79520";
+	this.colour = (colour) ? colour : "#f79520";
 	this.randomMag = 1000;
 
 	this.shape = new b2CircleDef();
 	this.shape.density = 0.05;
-	this.shape.radius = 20 + Math.random() * 10;
+	this.shape.radius = (size) ? size : 20 + Math.random() * 10;
 	this.shape.restitution = 0.1;
 	this.shape.friction = 10;
 
@@ -37,10 +40,6 @@ GVBall.prototype.FRICTION_STRENGTH = 0.9;
 GVBall.prototype.MAX_SPEED = 5;
 GVBall.prototype.DRAW_TEXT = true;
 
-GVBall.prototype.getName = function() {
-	return "Pull Request #" + this.id + ": " + this.status;
-}
-
 GVBall.prototype.merge = function() {
 	this.merged = true;
 	this.colour = "#00DD99";
@@ -52,6 +51,28 @@ GVBall.prototype.merge = function() {
 	}).bind(this), 2000);
 
 	this.status = "merged";
+};
+
+GVBall.prototype.setAttributes = function(attr) {
+	this.id = (attr.id) ? attr.id : this.id;
+	this.status = (attr.status) ? attr.status : this.status;
+	this.colour = (attr.colour) ? attr.colour : this.colour;
+
+	if (attr.size) {
+		this.size = attr.size;
+		this.shape = new b2CircleDef();
+		this.shape.density = 0.05;
+		this.shape.radius = this.size;
+		this.shape.restitution = 0.1;
+		this.shape.friction = 10;
+
+		this.bodyDef = new b2BodyDef();
+		this.bodyDef.AddShape(this.shape);
+		this.bodyDef.position.Set(this.pos.x,this.pos.y);
+
+		this.world.DestroyBody(this.body);
+		this.body = this.world.CreateBody(this.bodyDef);
+	}
 };
 
 GVBall.prototype.setInput = function(x, y) {

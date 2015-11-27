@@ -23,6 +23,12 @@ function GVRepo(){
 }
 
 GVRepo.prototype = new GVObject();
+GVRepo.prototype.MAX_SPEED = 200;
+
+GVRepo.prototype.setAttributes = function(attr) {
+	this.colour = (attr.colour) ? attr.colour : this.colour;
+	this.name = (attr.name) ? attr.name : this.name;
+};
 
 GVRepo.prototype.getGravityVector = function(from, merged) {
 	var force = new Vector();
@@ -51,6 +57,12 @@ GVRepo.prototype.update = function() {
 	// this.accel = Vector.Zero();
 
 	// this.setPos(this.pos.x, this.pos.y);
+	var velocity = this.body.GetLinearVelocity();
+	var speed = velocity.Length();
+	if (speed > this.MAX_SPEED){
+		velocity.Multiply(this.MAX_SPEED / speed)
+		this.body.SetLinearVelocity(velocity);
+	}
 
 	var xForce = 0;
 	var yForce = 0;
