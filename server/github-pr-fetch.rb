@@ -1,14 +1,9 @@
-# require "ghee"
 require "json"
 require "github_api"
 
 # puts "--------------------------"
 # puts "| GITHUB ACTIVITY SERVER |"
 # puts "------ Sunmock Yang ------"
-
-Owner = ""
-Repo = ""
-Token = ""
 
 class GithubPR
 	def initialize(owner, repo, token)
@@ -75,10 +70,3 @@ class GithubPR
 			}
 		end
 end
-
-pr_activity = GithubPR.new(Owner, Repo, Token)
-
-# puts pr_activity.fetch_all_open_pull_requests.to_json
-# puts pr_activity.fetch_pull_request(4710).to_json
-
-puts pr_activity.fetch_multiple_pull_requests([4709, 4710])
