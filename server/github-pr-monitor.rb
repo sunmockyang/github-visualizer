@@ -15,14 +15,17 @@ pr_activity = GithubPR.new(Owner, Repo, Token)
 require 'sinatra'
 
 get '/all' do
-  pr_activity.fetch_all_open_pull_requests.to_json
+	content_type :json
+	pr_activity.fetch_all_open_pull_requests.to_json
 end
 
 get '/pull/:number' do |num|
+	content_type :json
 	pr_activity.fetch_pull_request(num.to_i).to_json
 end
 
 get '/pulls/:numbers' do |nums|
+	content_type :json
 	numbers = nums.split(",")
 	numbers.map { |str| str.to_i }
 	pr_activity.fetch_multiple_pull_requests(numbers).to_json
