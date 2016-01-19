@@ -16,8 +16,8 @@ function GVClient (ballList, boidList, setMainBallAttr, createBall, mergeBall, s
 	this.ballList = ballList;
 	this.boidList = boidList;
 
-	// Set to 30 seconds
-	this.checkInterval = 30 * 1000;
+	// Set to 5 minutes
+	this.checkInterval = 5 * 60 * 1000;
 
 	this.update();
 
@@ -97,11 +97,11 @@ GVClient.prototype.CommentExists = function(number) {
 };
 
 function PullRequestNameFunction() {
-	return "Pull Request #" + this.id + ": " + this.status;
+	return "Pull Request #" + this.name + ": " + this.status;
 };
 
 function CommentNameFunction() {
-	return "Comment by " + this.name;
+	return "Comment by " + this.name + " on #" + this.follow.name;
 };
 
 function httpGet(url, callback) {

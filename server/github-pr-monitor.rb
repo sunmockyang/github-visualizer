@@ -7,7 +7,7 @@ repo_credentials = JSON.parse(config_file)["repositories"]
 pr_activities = []
 
 repo_credentials.each { |repo|
-	pr_activities.push(GithubPR.new(repo["owner"], repo["repository"], repo["token"], repo["client_id"], repo["client_secret"]))
+	pr_activities.push(GithubPR.new(repo))
 }
 
 if pr_activities.empty?
