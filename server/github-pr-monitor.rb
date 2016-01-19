@@ -15,6 +15,9 @@ if pr_activities.empty?
 	exit
 end
 
+set :port, 8080
+set :bind, '0.0.0.0'
+
 get "/" do
 	send_file File.expand_path(File.dirname(__FILE__) + '/../index.html')
 end
