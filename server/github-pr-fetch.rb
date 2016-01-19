@@ -6,11 +6,19 @@ require "github_api"
 # puts "------ Sunmock Yang ------"
 
 class GithubPR
-	def initialize(owner, repo, token)
+	def initialize(owner, repo, token, client_id, client_secret)
 		@owner = owner
 		@repo = repo
 
-		@gh = Github.new(oauth_token: token, user: owner, repo: repo)
+		@gh = Github.new(oauth_token: token, client_id: client_id, client_secret: client_secret, user: owner, repo: repo)
+	end
+
+	def get_owner
+		@owner
+	end
+
+	def get_repo
+		@repo
 	end
 
 	def fetch_all_open_pull_requests
@@ -49,23 +57,25 @@ class GithubPR
 
 		def get_pull_request_comments(number)
 			comments = []
-			@gh.pull_requests.comments.list(user:Owner, repo:Repo, number:number).each { |comment| comments.push comment }
-			@gh.issues.comments.list(user:Owner, repo:Repo, number:number).each { |comment| comments.push comment }
+			@gh.pull_requests.comments.list(user:@owner, repo:@repo, number:number).each { |comment| comments.push comment }
+			@gh.issues.comments.list(user:@owner, repo:@repo, number:number).each { |comment| comments.push comment }
 			return comments
 		end
 
 		def self.format_pull_request(pr, comments)
 			return {
 				user: pr["user"]["login"],
-				number: pr["number"],
+				id: "#{pr["base"]["repo"]["owner"]["login"]}:#{pr["base"]["repo"]["name"]}:#{pr["number"]}",
+				name: pr["number"].to_i,
 				state: pr["state"],
-				comments: comments.map { |comment| GithubPR.format_comment(comment) }
+				comments: comments.map { |comment| GithubPR.format_comment(comment) },
+				repo: {"owner" => pr["base"]["repo"]["owner"]["login"], "name" => pr["base"]["repo"]["name"]}
 			}
 		end
 
 		def self.format_comment(comment)
 			return {
-				user: comment["user"]["login"],
+				username: comment["user"]["login"],
 				id: comment["id"]
 			}
 		end

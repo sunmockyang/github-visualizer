@@ -47,7 +47,7 @@ GVClient.prototype.update = function() {
 		prIDs = "";
 
 		for (var i = 0; i < this.ballList.length; i++) {
-			prIDs += ((prIDs == "") ? "/" : ",") + this.ballList[i].id
+			prIDs += ((prIDs == "") ? "?pr=" : ",") + this.ballList[i].repo.owner + ":" + this.ballList[i].repo.name + ":" + this.ballList[i].id;
 		};
 
 		httpGet(constructURL(this.HOSTNAME, this.PORT, this.GET_ALL_ENDPOINT), this.parse_request.bind(this))
@@ -61,26 +61,26 @@ GVClient.prototype.parse_request = function(response) {
 	dataPackage = JSON.parse(response);
 
 	for (var i = 0; i < dataPackage.length; i++) {
-		if (this.PRExists(dataPackage[i].number)){
+		if (this.PRExists(dataPackage[i])){
 			if (dataPackage[i].state != "open") {
-				this.mergeBall(dataPackage[i].number);
+				this.mergeBall(dataPackage[i].id);
 			}
 		}
 		else {
-			this.createBall(dataPackage[i].number.toString(), dataPackage[i].state);
+			this.createBall(dataPackage[i]);
 		}
 
 		for (var j = 0; j < dataPackage[i].comments.length; j++) {
 			if (!this.CommentExists(dataPackage[i].comments[j].id)){
-				this.createBoid(dataPackage[i].number, "#559999", dataPackage[i].comments[j].user, dataPackage[i].comments[j].id);
+				this.createBoid(dataPackage[i].id, dataPackage[i].comments[j]);
 			}
 		};
 	};
 };
 
-GVClient.prototype.PRExists = function(number) {
+GVClient.prototype.PRExists = function(attr) {
 	for (var i = 0; i < this.ballList.length; i++) {
-		if (this.ballList[i].id == number) {
+		if (this.ballList[i].id == attr.id) {
 			return true;
 		};
 	};

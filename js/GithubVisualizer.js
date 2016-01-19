@@ -59,19 +59,19 @@ GithubVisualizer.prototype.setMainBallAttr = function(attr) {
 	this.mainRepo.setAttributes(attr);
 };
 
-GithubVisualizer.prototype.createBoid = function(ballID, colour, name, id) {
+GithubVisualizer.prototype.createBoid = function(ballID, attr) {
 	var distFromEdge = -200;
 	var screenBounds = this.camera.getBounds();
 	var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
 	var y = (Math.random() > 0.5) ? screenBounds.top : (screenBounds.top + screenBounds.height - distFromEdge);
-	var boid = new GVBoid(x, y, this.findBallByID(ballID), colour, name, id, this.boids);
+	var boid = new GVBoid(x, y, this.findBallByID(ballID), this.boids, attr);
 	this.boids.push(boid);
 	this.addObject(boid);
 
 	this.camera.setFollowObject(boid);
 };
 
-GithubVisualizer.prototype.createBall = function(id, status, colour, size) {
+GithubVisualizer.prototype.createBall = function(attr) {
 	var distFromEdge = 200;
 	var screenBounds = this.camera.getBounds();
 	var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
@@ -84,7 +84,7 @@ GithubVisualizer.prototype.createBall = function(id, status, colour, size) {
 		this.camera.addObject(this.particles[this.particles.length - 1]);
 	};
 
-	var ball = new GVBall(this.world, x, y, this.mainRepo, id, status, colour, size);
+	var ball = new GVBall(this.world, x, y, this.mainRepo, attr);
 	this.drops.push(ball);
 	this.addObject(ball);
 
