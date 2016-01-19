@@ -47,7 +47,7 @@ GVClient.prototype.update = function() {
 		prIDs = "";
 
 		for (var i = 0; i < this.ballList.length; i++) {
-			prIDs += ((prIDs == "") ? "?pr=" : ",") + this.ballList[i].repo.owner + ":" + this.ballList[i].repo.name + ":" + this.ballList[i].id;
+			prIDs += ((prIDs == "") ? "?pr=" : ",") + this.ballList[i].id;
 		};
 
 		httpGet(constructURL(this.HOSTNAME, this.PORT, this.GET_ALL_ENDPOINT), this.parse_request.bind(this))
