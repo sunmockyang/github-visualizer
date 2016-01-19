@@ -1,12 +1,8 @@
 require 'sinatra'
 require_relative "github-pr-fetch"
 
-
-repo_credentials = []
-
-# Get a token from https://github.com/settings/tokens
-# TODO: get client id/secrets working. Hitting API limits is a problem...
-# repo_credentials.push({"owner": "sunmockyang", "repo": "github-visualizer", "token" => ""})
+config_file = File.read(File.dirname(__FILE__) + '/repositories-config.json')
+repo_credentials = JSON.parse(config_file)["repositories"]
 
 pr_activities = []
 

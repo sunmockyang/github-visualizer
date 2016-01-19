@@ -1,0 +1,11 @@
+// Get a token from https://github.com/settings/tokens
+// TODO: get client id/secrets working. Hitting API limits is a problem...
+{
+	"repositories": [
+		{
+			"owner": "sunmockyang",
+			"repo": "github-visualizer",
+			"token": ""
+		}
+	]
+}
