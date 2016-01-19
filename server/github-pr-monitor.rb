@@ -15,6 +15,22 @@ if pr_activities.empty?
 	exit
 end
 
+get "/" do
+	send_file File.expand_path(File.dirname(__FILE__) + '/../index.html')
+end
+
+get "/js/*" do
+	send_file File.expand_path(File.dirname(__FILE__) + "/../js/#{params["splat"].join}")
+end
+
+get "/img/*" do
+	send_file File.expand_path(File.dirname(__FILE__) + "/../img/#{params["splat"].join}")
+end
+
+get "/fonts/*" do
+	send_file File.expand_path(File.dirname(__FILE__) + "/../fonts/#{params["splat"].join}")
+end
+
 # hostname:1234/all
 # Get all open PRs
 get '/all' do
