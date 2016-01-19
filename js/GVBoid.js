@@ -1,4 +1,4 @@
-function GVBoid(x, y, follow, colour, name, others) {
+function GVBoid(x, y, follow, colour, name, id, others) {
 	this.size = 10;
 	this.others = others;
 	this.follow = follow;
@@ -9,6 +9,7 @@ function GVBoid(x, y, follow, colour, name, others) {
 	this.colour = (colour) ? colour : '#559999';
 	this.rotate = 0;
 	this.name = (name) ? name : "Comment";
+	this.id = (id) ? id : 0
 
 	this.pos = new Vector(x, y);
 	this.speed = new Vector(Math.random() * 20 - 10, Math.random() * 20 - 10);

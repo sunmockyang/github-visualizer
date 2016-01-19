@@ -37,7 +37,7 @@ function GVBall(world, x, y, mainRepo, id, status, colour, size){
 GVBall.prototype = new GVObject();
 GVBall.prototype.INPUT_STRENGTH = 2;
 GVBall.prototype.FRICTION_STRENGTH = 0.9;
-GVBall.prototype.MAX_SPEED = 5;
+GVBall.prototype.MAX_SPEED = 400;
 GVBall.prototype.DRAW_TEXT = true;
 
 GVBall.prototype.merge = function() {
@@ -85,6 +85,13 @@ GVBall.prototype.setInput = function(x, y) {
 GVBall.prototype.update = function() {
 	this.anim();
 
+	var velocity = this.body.GetLinearVelocity();
+	var speed = velocity.Length();
+	if (speed > this.MAX_SPEED){
+		velocity.Multiply(this.MAX_SPEED / speed)
+		this.body.SetLinearVelocity(velocity);
+	}
+
 	var randomForce = new Vector(Math.random() * this.randomMag - this.randomMag/2, Math.random() * this.randomMag - this.randomMag/2);
 	this.body.ApplyForce(this.mainRepo.getGravityVector(this.pos, this.merged), this.body.GetCenterPosition());
 	this.body.ApplyForce(randomForce, this.body.GetCenterPosition())
@@ -99,11 +106,11 @@ GVBall.prototype.draw = function() {
 	this.context.closePath();
 
 	if (this.DRAW_TEXT){
-		this.context.font = Math.floor(this.size/1.5) + "px GothamSsm";
+		this.context.font = Math.floor(this.size/2.2) + "px GothamSsm";
 		var text = "#" + this.id;
 		var width = this.context.measureText(text).width;
 		var left = (this.pos.x - width) / 2 + this.pos.x;
-		var top = this.pos.y - 10;
+		var top = this.pos.y - 12;
 		this.context.textBaseline = "hanging";
 		this.context.fillStyle = "#FFFFFF";
 		this.context.fillText(text, -width/2, -this.size/5);

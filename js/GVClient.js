@@ -5,8 +5,7 @@ This is the main interface to controlling the app from an external input.
 Check out the README.md file for details on adding functionality
 */
 
-
-function GVClient (ballList, setMainBallAttr, createBall, mergeBall, setBallAttributes, createBoid) {
+function GVClient (ballList, boidList, setMainBallAttr, createBall, mergeBall, setBallAttributes, createBoid) {
 	this.setup();
 
 	this.setMainBallAttr = setMainBallAttr;
@@ -15,12 +14,10 @@ function GVClient (ballList, setMainBallAttr, createBall, mergeBall, setBallAttr
 	this.setBallAttributes = setBallAttributes;
 	this.createBoid = createBoid;
 	this.ballList = ballList;
+	this.boidList = boidList;
 
-	// this.checkInterval = 100;
-
-	for (var i = 0; i < 10; i++) {
-		this.createBall(nextID++, "open", "#f79520", 20 + Math.random() * 10);
-	};
+	// Set to 30 seconds
+	this.checkInterval = 30 * 1000;
 
 	this.update();
 
@@ -29,6 +26,11 @@ function GVClient (ballList, setMainBallAttr, createBall, mergeBall, setBallAttr
 
 // Image displayed in the center of the big circle
 GVClient.prototype.imageURL = "img/youilogo.png";
+GVClient.prototype.HOSTNAME = "http://localhost";
+GVClient.prototype.PORT = "4567";
+GVClient.prototype.GET_ALL_ENDPOINT = "/all";
+GVClient.prototype.GET_ENDPOINT = "/pull";
+GVClient.prototype.GET_MULTIPLE_ENDPOINT = "/pulls";
 
 GVClient.prototype.setup = function() {
 	// Overriding the text that appears in the text box
@@ -38,8 +40,60 @@ GVClient.prototype.setup = function() {
 
 GVClient.prototype.update = function() {
 	// A looping update function to monitor external sources.
-	// Not currently used. Uncomment the next line to loop.
-	// setTimeout(this.update.bind(this), this.checkInterval);
+	if (this.ballList.length == 0) {
+		httpGet(constructURL(this.HOSTNAME, this.PORT, this.GET_ALL_ENDPOINT), this.parse_request.bind(this))
+	}
+	else {
+		prIDs = "";
+
+		for (var i = 0; i < this.ballList.length; i++) {
+			prIDs += ((prIDs == "") ? "/" : ",") + this.ballList[i].id
+		};
+
+		httpGet(constructURL(this.HOSTNAME, this.PORT, this.GET_ALL_ENDPOINT), this.parse_request.bind(this))
+		httpGet(constructURL(this.HOSTNAME, this.PORT, this.GET_MULTIPLE_ENDPOINT, prIDs), this.parse_request.bind(this))
+	}
+
+	setTimeout(this.update.bind(this), this.checkInterval);
+};
+
+GVClient.prototype.parse_request = function(response) {
+	dataPackage = JSON.parse(response);
+
+	for (var i = 0; i < dataPackage.length; i++) {
+		if (this.PRExists(dataPackage[i].number)){
+			if (dataPackage[i].state != "open") {
+				this.mergeBall(dataPackage[i].number);
+			}
+		}
+		else {
+			this.createBall(dataPackage[i].number.toString(), dataPackage[i].state);
+		}
+
+		for (var j = 0; j < dataPackage[i].comments.length; j++) {
+			if (!this.CommentExists(dataPackage[i].comments[j].id)){
+				this.createBoid(dataPackage[i].number, "#559999", dataPackage[i].comments[j].user, dataPackage[i].comments[j].id);
+			}
+		};
+	};
+};
+
+GVClient.prototype.PRExists = function(number) {
+	for (var i = 0; i < this.ballList.length; i++) {
+		if (this.ballList[i].id == number) {
+			return true;
+		};
+	};
+	return false;
+};
+
+GVClient.prototype.CommentExists = function(number) {
+	for (var i = 0; i < this.boidList.length; i++) {
+		if (this.boidList[i].id == number) {
+			return true;
+		};
+	};
+	return false;
 };
 
 function PullRequestNameFunction() {
@@ -50,9 +104,25 @@ function CommentNameFunction() {
 	return "Comment by " + this.name;
 };
 
+function httpGet(url, callback) {
+	console.log(url)
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+            callback(xmlHttp.responseText);
+        }
+    }
+    xmlHttp.open("GET", url, true); // true for asynchronous 
+    xmlHttp.send(null);
+};
+
+function constructURL(hostname, port, endpoint, options) {
+	return hostname + ":" + port + endpoint + ((options) ? options : "");
+}
+
 // Rest here is debug/example stuff
 
-var nextID = 32;
+var nextID = 3200;
 var randomNames = ["Sunmock Yang", "Joe Dirt", "You i", "the Manatee", "Mexican Android"]
 
 GVClient.prototype.keyPress = function(e) {
@@ -74,7 +144,7 @@ GVClient.prototype.keyPress = function(e) {
 		// b
 		else if (charCode == 98){
 			for (var i = 0; i < 100; i++) {
-				this.createBoid(this.getRandomBallID(), "#559999", randomNames[Math.floor(Math.random() * randomNames.length)]);
+				this.createBoid(this.getRandomBallID(), "#559999", randomNames[Math.floor(Math.random() * randomNames.length)], Math.floor(Math.random() * 10000));
 			}
 		}
 		// c

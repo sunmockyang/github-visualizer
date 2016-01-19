@@ -21,7 +21,7 @@ function GithubVisualizer(canvas){
 	this.particles = [];
 	this.camera.setFollowObject(this.mainRepo, true);
 
-	this.client = new GVClient(this.drops, this.setMainBallAttr.bind(this), this.createBall.bind(this), this.mergeBall.bind(this), this.setBallAttributes.bind(this), this.createBoid.bind(this));
+	this.client = new GVClient(this.drops, this.boids, this.setMainBallAttr.bind(this), this.createBall.bind(this), this.mergeBall.bind(this), this.setBallAttributes.bind(this), this.createBoid.bind(this));
 
 	this.logo = new GVImage(this.client.imageURL);
 	this.addObject(this.logo);
@@ -59,12 +59,12 @@ GithubVisualizer.prototype.setMainBallAttr = function(attr) {
 	this.mainRepo.setAttributes(attr);
 };
 
-GithubVisualizer.prototype.createBoid = function(id, colour, name) {
+GithubVisualizer.prototype.createBoid = function(ballID, colour, name, id) {
 	var distFromEdge = -200;
 	var screenBounds = this.camera.getBounds();
 	var x = (Math.random() > 0.5) ? screenBounds.left : (screenBounds.left + screenBounds.width - distFromEdge);
 	var y = (Math.random() > 0.5) ? screenBounds.top : (screenBounds.top + screenBounds.height - distFromEdge);
-	var boid = new GVBoid(x, y, this.findBallByID(id), colour, name, this.boids);
+	var boid = new GVBoid(x, y, this.findBallByID(ballID), colour, name, id, this.boids);
 	this.boids.push(boid);
 	this.addObject(boid);
 
@@ -124,15 +124,22 @@ GithubVisualizer.prototype.findBallByID = function(id) {
 
 GithubVisualizer.prototype.setRandomCameraFollow = function() {
 	var drop = this.drops[Math.floor(Math.random() * this.drops.length)];
+	var boid = this.boids[Math.floor(Math.random() * this.boids.length)];
 
-	if (!this.camera.followObj || this.camera.followObj != this.mainRepo || this.drops.length == 0 || drop.size < 1) {
+	if (!this.camera.followObj || this.camera.followObj != this.mainRepo ||
+		this.drops.length == 0 || drop.size < 1 ||
+		this.boids.length == 0 || (boid.follow && boid.follow.size < 1)) {
 		this.camera.setFollowObject(this.mainRepo);
 		this.camera.followStrength = 0.07;
 	}
-	else {
+	else if (Math.random() > 0.5) {
 		this.camera.setFollowObject(drop);
 		this.camera.followStrength = 0.08;
-	} 
+	}
+	else {
+		this.camera.setFollowObject(boid);
+		this.camera.followStrength = 0.08;
+	}
 };
 
 GithubVisualizer.prototype.addObject = function(obj) {
