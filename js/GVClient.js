@@ -117,7 +117,8 @@ function httpGet(url, callback) {
 };
 
 function constructURL(hostname, port, endpoint, options) {
-	return hostname + ":" + port + endpoint + ((options) ? options : "");
+	return endpoint + ((options) ? options : "");
+	// return hostname + ":" + port + endpoint + ((options) ? options : "");
 }
 
 // Rest here is debug/example stuff
