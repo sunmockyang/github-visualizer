@@ -92,6 +92,17 @@ get '/pulls' do
 	return pr_data.to_json
 end
 
+get "/cache" do
+	headers 'Access-Control-Allow-Origin' => '*'
+	content_type :json
+
+	cache = {}
+	pr_activities.each { |repo|
+		cache[repo.get_repo] = repo.get_cache
+	}
+	return cache.to_json
+end
+
 get "/test" do
 	headers 'Access-Control-Allow-Origin' => '*'
 	"HELLO WORLD"

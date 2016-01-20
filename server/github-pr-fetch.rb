@@ -16,7 +16,7 @@ require 'thread'
 class GithubPRDataModel
 
 	def initialize(config)
-		@CACHE_AGE_LIMIT = 30
+		@CACHE_AGE_LIMIT = 5 * 60
 		@owner = config["owner"]
 		@repo = config["repository"]
 
@@ -44,11 +44,15 @@ class GithubPRDataModel
 		@repo
 	end
 
+	def get_cache
+		@cache
+	end
+
 	def fetch_all_open_pull_requests
 		pull_requests = []
 		get_all_open_pull_requests.each { |pr|
-			comments = get_pull_request_comments(pr["number"])
-			pull_requests.push format_pull_request(pr, comments)
+			pr[:comments] = get_pull_request_comments(pr[:name])
+			pull_requests.push(pr)
 		}
 
 		return pull_requests
@@ -56,8 +60,8 @@ class GithubPRDataModel
 
 	def fetch_pull_request(pr_number)
 		pr = get_pull_request(pr_number)
-		comments = get_pull_request_comments(pr_number)
-		return format_pull_request(pr, comments)
+		pr[:comments] = get_pull_request_comments(pr_number)
+		return pr
 	end
 
 	# pr_numbers: array of numbers
@@ -70,7 +74,7 @@ class GithubPRDataModel
 	end
 
 	private
-		def format_pull_request(pr, comments)
+		def format_pull_request(pr)
 			return {
 				user: pr["user"]["login"],
 				repo: {"owner" => pr["base"]["repo"]["owner"]["login"], "name" => pr["base"]["repo"]["name"]},
@@ -78,7 +82,7 @@ class GithubPRDataModel
 				name: pr["number"].to_i,
 				state: pr["state"],
 				colour: @pr_colour,
-				comments: comments.map { |comment| format_comment(comment) }
+				comments: nil
 			}
 		end
 
@@ -102,7 +106,7 @@ class GithubPRDataModel
 					@cache.clear
 					response.each { |pr|
 						@cache[pr["number"].to_i] = new_cache_entry
-						@cache[pr["number"].to_i][:pull_request] = pr
+						@cache[pr["number"].to_i][:pull_request] = format_pull_request(pr)
 					}
 				else
 					puts "[CACHE] - GET ALL OPEN PRs: #{@gh_hits}"
@@ -131,10 +135,10 @@ class GithubPRDataModel
 					@gh_hits += 1
 					puts "GET PR ##{number}: #{@gh_hits}"
 
-					pr = @gh.pull_requests.get(number:number)
+					pr = format_pull_request(@gh.pull_requests.get(number:number))
 					
 					# Only cache if the pr is open
-					if pr["state"] == "open"
+					if pr[:state] == "open"
 						if !valid_entry?(@cache[number])
 							@cache[number] = new_cache_entry
 						end
@@ -169,7 +173,7 @@ class GithubPRDataModel
 					puts "GET COMMENTS FOR PR ##{number}: #{@gh_hits}"
 					@gh.pull_requests.comments.list(user:@owner, repo:@repo, number:number).each { |comment| comments.push comment }
 					@gh.issues.comments.list(user:@owner, repo:@repo, number:number).each { |comment| comments.push comment }
-
+					comments.map! { |comment| format_comment(comment) }
 					# Only cache if the PR is available in the cache
 					if valid_entry?(@cache[number])
 						@cache[number][:comments] = comments
@@ -199,7 +203,7 @@ class GithubPRDataModel
 		def valid_entry?(cache_entry)
 			valid = !cache_entry.nil? &&
 				get_cache_entry_age(cache_entry) < @CACHE_AGE_LIMIT &&
-				(cache_entry[:pull_request].nil? || cache_entry[:pull_request]["state"] == "open")
+				(cache_entry[:pull_request].nil? || cache_entry[:pull_request][:state] == "open")
 			return valid
 		end
 
