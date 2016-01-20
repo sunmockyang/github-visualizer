@@ -17,6 +17,11 @@ end
 
 set :port, 8080
 set :bind, '0.0.0.0'
+set :logging, false
+
+# ########### #
+# SERVE FILES #
+# ########### #
 
 get "/" do
 	send_file File.expand_path(File.dirname(__FILE__) + '/../index.html')
@@ -33,6 +38,10 @@ end
 get "/fonts/*" do
 	send_file File.expand_path(File.dirname(__FILE__) + "/../fonts/#{params["splat"].join}")
 end
+
+# ############## #
+# API END POINTS #
+# ############## #
 
 # hostname:1234/all
 # Get all open PRs
