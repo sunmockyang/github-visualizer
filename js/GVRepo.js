@@ -36,7 +36,7 @@ GVRepo.prototype.getGravityVector = function(from, merged) {
 	if (delta.mag() > this.repelDist || merged){
 		force = delta.multiply(this.gravity);
 		if (merged){
-			force = force.multiply(2);
+			force = force.multiply(5);
 		}
 	}
 	else {

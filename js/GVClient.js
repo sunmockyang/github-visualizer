@@ -51,7 +51,6 @@ GVClient.prototype.update = function() {
 		};
 
 		httpGet(constructURL(this.HOSTNAME, this.PORT, this.GET_ALL_ENDPOINT), this.parse_request.bind(this))
-		httpGet(constructURL(this.HOSTNAME, this.PORT, this.GET_MULTIPLE_ENDPOINT, prIDs), this.parse_request.bind(this))
 	}
 
 	setTimeout(this.update.bind(this), this.checkInterval);
@@ -60,9 +59,22 @@ GVClient.prototype.update = function() {
 GVClient.prototype.parse_request = function(response) {
 	dataPackage = JSON.parse(response);
 
+	// Keep track of which has no status
+	var mergedBallList = this.ballList.slice();
+
 	for (var i = 0; i < dataPackage.length; i++) {
 		if (this.PRExists(dataPackage[i])){
-			if (dataPackage[i].state != "open") {
+			if (dataPackage[i].state == "open"){
+				// If a ball has status "open" it is removed from the merged ball list
+				var j;
+				for (j = 0; j < mergedBallList.length; j++) {
+					if (mergedBallList[j].id == dataPackage[i].id){
+						break;
+					}
+				};
+				mergedBallList.splice(j, 1);
+			}
+			else {
 				this.mergeBall(dataPackage[i].id);
 			}
 		}
@@ -75,6 +87,11 @@ GVClient.prototype.parse_request = function(response) {
 				this.createBoid(dataPackage[i].id, dataPackage[i].comments[j]);
 			}
 		};
+	};
+
+	// Merge all balls that did not receive a response
+	for (var i = 0; i < mergedBallList.length; i++) {
+		this.mergeBall(mergedBallList[i].id);
 	};
 };
 
