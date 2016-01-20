@@ -30,9 +30,16 @@ GVCamera.prototype.onresize = function() {
 GVCamera.prototype.followStrength = 0.05;
 
 // Push type GVObject
-GVCamera.prototype.addObject = function(obj) {
+GVCamera.prototype.addObject = function(obj, front) {
 	obj.addCamera(this);
-	this.drawObjects.push(obj);
+
+	// by default add items to the front
+	if (front !== true) {
+		this.drawObjects.unshift(obj)
+	}
+	else {
+		this.drawObjects.push(obj);
+	}
 };
 
 GVCamera.prototype.removeObject = function(obj) {

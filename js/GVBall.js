@@ -46,7 +46,7 @@ GVBall.prototype.DRAW_TEXT = true;
 
 GVBall.prototype.merge = function() {
 	this.merged = true;
-	this.colour = "#00DD99";
+	this.colour = this.mainRepo.colour;
 
 	setTimeout((function(){
 			this.anim = function() {

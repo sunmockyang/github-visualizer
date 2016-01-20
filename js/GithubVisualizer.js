@@ -66,7 +66,7 @@ GithubVisualizer.prototype.createBoid = function(ballID, attr) {
 	var y = (Math.random() > 0.5) ? screenBounds.top : (screenBounds.top + screenBounds.height - distFromEdge);
 	var boid = new GVBoid(x, y, this.findBallByID(ballID), this.boids, attr);
 	this.boids.push(boid);
-	this.addObject(boid);
+	this.addObject(boid, true);
 
 	this.camera.setFollowObject(boid);
 };
@@ -86,7 +86,7 @@ GithubVisualizer.prototype.createBall = function(attr) {
 
 	var ball = new GVBall(this.world, x, y, this.mainRepo, attr);
 	this.drops.push(ball);
-	this.addObject(ball);
+	this.addObject(ball, false);
 
 	this.camera.setFollowObject(ball);
 	this.camera.followStrength = 0.08;
@@ -142,8 +142,8 @@ GithubVisualizer.prototype.setRandomCameraFollow = function() {
 	}
 };
 
-GithubVisualizer.prototype.addObject = function(obj) {
-	this.camera.addObject(obj);
+GithubVisualizer.prototype.addObject = function(obj, front) {
+	this.camera.addObject(obj, front);
 
 	if (obj.isPhysicsObject()) {
 		obj.body = this.world.CreateBody(obj.bodyDef);
