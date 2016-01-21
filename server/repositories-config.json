@@ -6,8 +6,20 @@
 			"owner": "sunmockyang",
 			"repo": "github-visualizer",
 			"token": ""
+			"repository": "github-visualizer",
+			"repo_img": null, // Path
+			"repo_colour": null, // Hex/rgb Colour
+			"bg_colour": null,
 			"pr_colour": "#20AAD9",
 			"comment_colour": "#14A89F"
 		}
-	]
+	],
+
+	"all-repositories": {
+		"owner": "You.i Labs",
+		"repository": "Magic Factory",
+		"repo_img": "img/logo.png",
+		"repo_colour": "#FD0000",
+		"bg_colour": "#F5DFE6"
+	}
 }

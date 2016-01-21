@@ -17,6 +17,7 @@ class GithubPRDataModel
 
 	def initialize(config)
 		@CACHE_AGE_LIMIT = 5 * 60
+		@config = config
 		@owner = config["owner"]
 		@repo = config["repository"]
 
@@ -46,6 +47,12 @@ class GithubPRDataModel
 
 	def get_cache
 		@cache
+	end
+
+	def get_configuration
+		config = @config.clone
+		config.delete("token")
+		return config
 	end
 
 	def fetch_all_open_pull_requests

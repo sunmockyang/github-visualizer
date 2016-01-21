@@ -4,12 +4,13 @@ function GVRepo(){
 	this.repelDist = this.size + 175;
 	this.repelStrength = this.gravity * 30;
 	this.floatStrength = 50000000;
-	this.name = "The Repository";
+	this.owner = GVConfig.owner || "My";
+	this.name = GVConfig.repository || "Awesome";
 
 	this.accel = new Vector(0, 0);
 	this.speed = new Vector(0,0);
 	this.pos = new Vector(500, 500);
-	this.colour = "#ef4237";
+	this.colour = GVConfig.repo_colour || "#ef4237";
 
 	this.shape = new b2CircleDef();
 	this.shape.density = 1;

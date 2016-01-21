@@ -25,7 +25,6 @@ function GVClient (ballList, boidList, setMainBallAttr, createBall, mergeBall, s
 }
 
 // Image displayed in the center of the big circle
-GVClient.prototype.imageURL = "img/logo.png";
 GVClient.prototype.HOSTNAME = "http://localhost";
 GVClient.prototype.PORT = "4567";
 GVClient.prototype.GET_ALL_ENDPOINT = "/api/all";
@@ -36,6 +35,7 @@ GVClient.prototype.setup = function() {
 	// Overriding the text that appears in the text box
 	GVBall.prototype.getName = PullRequestNameFunction;
 	GVBoid.prototype.getName = CommentNameFunction;
+	GVRepo.prototype.getName = RepoNameFunction;
 };
 
 GVClient.prototype.update = function() {
@@ -110,6 +110,16 @@ function CommentNameFunction() {
 	return "Comment by " + this.name + " on #" + this.follow.name;
 };
 
+function RepoNameFunction() {
+	var suffix = (this.owner == "My") ? "" : (strEndsWith(this.owner, "s") ? "\'" : "\'s")
+
+	return this.owner + suffix + " " + this.name + " Repository";
+};
+
+function strEndsWith(str, suffix) {
+    return str.match(suffix+"$")==suffix;
+}
+
 function httpGet(url, callback) {
 	console.log(url)
     var xmlHttp = new XMLHttpRequest();
@@ -134,6 +144,7 @@ function constructAPIURL(hostname, port, endpoint, options) {
 	};
 
 	return url + endpoint + ((options) ? options : "");
+	// Comment above and uncomment below if you want to run off a local server
 	// return hostname + ":" + port + endpoint + ((options) ? options : "");
 }
 

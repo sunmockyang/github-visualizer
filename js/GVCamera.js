@@ -14,6 +14,8 @@ function GVCamera(context, defaultFollowObj){
 
 	this.shadowColour = "rgba(0, 0, 0, 0.15)";
 	this.shadowDistance = 4;
+
+	this.bgColour = GVConfig.bg_colour || "#FFFF99";
 }
 
 GVCamera.prototype.setRandomColour = function() {
@@ -69,7 +71,7 @@ GVCamera.prototype.lookAt = function(pos) {
 
 GVCamera.prototype.draw = function() {
 	// this.context.clearRect(0, 0, this.width, this.height);
-	this.context.fillStyle = "#FFFF99";
+	this.context.fillStyle = this.bgColour;
 	this.context.fillRect(0, 0, this.width, this.height);
 
 	var follow = (this.followObj != null) ? this.followObj.pos.clone() : this.center;
@@ -86,7 +88,6 @@ GVCamera.prototype.draw = function() {
 	};
 
 	for (var i = 0; i < this.drawObjects.length; i++) {
-		this.context.fillStyle = this.shadowColour;
 		this.context.save();
 		this.context.translate(this.drawObjects[i].pos.x - follow.x, this.drawObjects[i].pos.y - follow.y)
 		this.drawObjects[i].draw();
@@ -108,7 +109,7 @@ GVCamera.prototype.draw = function() {
 		this.context.fillRect(left - 10, top - 10, width + 20, 40);
 
 		this.context.textBaseline = "hanging";
-		this.context.fillStyle = this.followObj.colour;
+		this.context.fillStyle = (this.followObj.colour == "#FFFFFF") ? "#000000" : this.followObj.colour;
 		this.context.fillText(text, left, this.height - 100);
 	}
 

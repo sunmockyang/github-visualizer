@@ -118,7 +118,7 @@ GVBall.prototype.draw = function() {
 		var left = (this.pos.x - width) / 2 + this.pos.x;
 		var top = this.pos.y - 12;
 		this.context.textBaseline = "hanging";
-		this.context.fillStyle = "#FFFFFF";
+		this.context.fillStyle = (this.colour == "#FFFFFF") ? "#000000" : "#FFFFFF";
 		this.context.fillText(text, -width/2, -this.size/5);
 	}
 };

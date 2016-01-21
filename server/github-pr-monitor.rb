@@ -2,11 +2,12 @@ require 'sinatra'
 require_relative "github-pr-fetch"
 
 config_file = File.read(File.dirname(__FILE__) + '/repositories-config.json')
-repo_credentials = JSON.parse(config_file)["repositories"]
+repo_configs = JSON.parse(config_file)["repositories"]
+all_config = JSON.parse(config_file)["all-repositories"]
 
 pr_activities = []
 
-repo_credentials.each { |repo|
+repo_configs.each { |repo|
 	pr_activities.push(GithubPRDataModel.new(repo))
 }
 
@@ -50,7 +51,7 @@ end
 
 # hostname:1234/pull/owner_name/project_name/123
 # Gets PR #123 from "project_name" repository owned by "owner_name"
-get '/api/pull/:owner/:repo/:number' do
+get '/:owner/:repo/api/pull/:number' do
 	content_type :json
 	headers 'Access-Control-Allow-Origin' => '*'
 
@@ -95,6 +96,23 @@ get "/api/cache" do
 	return cache.to_json
 end
 
+
+["", "/:owner/:name"].each do |dir|
+	get "#{dir}/api/configuration.js" do
+		headers 'Access-Control-Allow-Origin' => '*'
+		content_type :js
+
+		config = {}
+		if !params["owner"].nil? && !params["name"].nil?
+			config = get_repository_by_owner_and_name(pr_activities, params["owner"], params["name"]).get_configuration
+		else
+			config = all_config
+		end
+
+		return "var GVConfig = #{config.to_json};"
+	end
+end
+
 get "/api/test" do
 	headers 'Access-Control-Allow-Origin' => '*'
 	"HELLO WORLD"
@@ -109,7 +127,7 @@ end
 		send_file File.expand_path(File.dirname(__FILE__) + '/../index.html')
 	end
 
-	get "/:name/:owner/#{path}" do
+	get "/:owner/:name/#{path}" do
 		send_file File.expand_path(File.dirname(__FILE__) + '/../index.html')
 	end
 end
