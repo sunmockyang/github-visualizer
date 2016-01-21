@@ -15,7 +15,6 @@ function GithubVisualizer(canvas){
 	this.camera = new GVCamera(this.context, this.mainRepo);
 	this.addObject(this.mainRepo);
 	
-
 	this.drops = [];
 	this.boids = [];
 	this.particles = [];
@@ -24,7 +23,10 @@ function GithubVisualizer(canvas){
 	this.client = new GVClient(this.drops, this.boids, this.setMainBallAttr.bind(this), this.createBall.bind(this), this.mergeBall.bind(this), this.setBallAttributes.bind(this), this.createBoid.bind(this));
 
 	this.logo = new GVImage(this.client.imageURL);
-	this.addObject(this.logo);
+	this.logo.onload = (function(){
+			this.logo.fitMaxBounds({width: this.mainRepo.size, height: this.mainRepo.size});
+	}).bind(this);
+	this.addObject(this.logo, true);
 
 	this.camera.setFollowObject(this.mainRepo, true);
 

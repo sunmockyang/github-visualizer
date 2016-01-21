@@ -25,7 +25,7 @@ function GVClient (ballList, boidList, setMainBallAttr, createBall, mergeBall, s
 }
 
 // Image displayed in the center of the big circle
-GVClient.prototype.imageURL = "img/youilogo.png";
+GVClient.prototype.imageURL = "img/logo.png";
 GVClient.prototype.HOSTNAME = "http://localhost";
 GVClient.prototype.PORT = "4567";
 GVClient.prototype.GET_ALL_ENDPOINT = "/all";
