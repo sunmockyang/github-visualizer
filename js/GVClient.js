@@ -16,8 +16,8 @@ function GVClient (ballList, boidList, setMainBallAttr, createBall, mergeBall, s
 	this.ballList = ballList;
 	this.boidList = boidList;
 
-	// Set to 5 minutes
-	this.checkInterval = 5 * 60 * 1000;
+	// Set to 30 seconds
+	this.checkInterval = 30 * 1000;
 
 	this.update();
 
@@ -28,9 +28,9 @@ function GVClient (ballList, boidList, setMainBallAttr, createBall, mergeBall, s
 GVClient.prototype.imageURL = "img/logo.png";
 GVClient.prototype.HOSTNAME = "http://localhost";
 GVClient.prototype.PORT = "4567";
-GVClient.prototype.GET_ALL_ENDPOINT = "/all";
-GVClient.prototype.GET_ENDPOINT = "/pull";
-GVClient.prototype.GET_MULTIPLE_ENDPOINT = "/pulls";
+GVClient.prototype.GET_ALL_ENDPOINT = "/api/all";
+GVClient.prototype.GET_ENDPOINT = "/api/pull";
+GVClient.prototype.GET_MULTIPLE_ENDPOINT = "/api/pulls";
 
 GVClient.prototype.setup = function() {
 	// Overriding the text that appears in the text box
@@ -40,18 +40,7 @@ GVClient.prototype.setup = function() {
 
 GVClient.prototype.update = function() {
 	// A looping update function to monitor external sources.
-	if (this.ballList.length == 0) {
-		httpGet(constructURL(this.HOSTNAME, this.PORT, this.GET_ALL_ENDPOINT), this.parse_request.bind(this))
-	}
-	else {
-		prIDs = "";
-
-		for (var i = 0; i < this.ballList.length; i++) {
-			prIDs += ((prIDs == "") ? "?pr=" : ",") + this.ballList[i].id;
-		};
-
-		httpGet(constructURL(this.HOSTNAME, this.PORT, this.GET_ALL_ENDPOINT), this.parse_request.bind(this))
-	}
+	httpGet(constructAPIURL(this.HOSTNAME, this.PORT, this.GET_ALL_ENDPOINT), this.parse_request.bind(this))
 
 	setTimeout(this.update.bind(this), this.checkInterval);
 };
@@ -133,8 +122,18 @@ function httpGet(url, callback) {
     xmlHttp.send(null);
 };
 
-function constructURL(hostname, port, endpoint, options) {
-	return endpoint + ((options) ? options : "");
+function constructAPIURL(hostname, port, endpoint, options) {
+	var urlPath = (location.pathname).split("/");
+	urlPath.pop()
+	var url = ""
+
+	for (var i = 0; i < urlPath.length; i++) {
+		if (urlPath[i] != "") {
+			url += "/" + urlPath[i];
+		}
+	};
+
+	return url + endpoint + ((options) ? options : "");
 	// return hostname + ":" + port + endpoint + ((options) ? options : "");
 }
 

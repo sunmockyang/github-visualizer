@@ -6,6 +6,8 @@
 			"owner": "sunmockyang",
 			"repo": "github-visualizer",
 			"token": ""
+			"pr_colour": "#20AAD9",
+			"comment_colour": "#14A89F"
 		}
 	]
 }

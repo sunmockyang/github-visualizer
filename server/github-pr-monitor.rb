@@ -19,33 +19,13 @@ set :port, 8080
 set :bind, '0.0.0.0'
 set :logging, false
 
-# ########### #
-# SERVE FILES #
-# ########### #
-
-get "/" do
-	send_file File.expand_path(File.dirname(__FILE__) + '/../index.html')
-end
-
-get "/js/*" do
-	send_file File.expand_path(File.dirname(__FILE__) + "/../js/#{params["splat"].join}")
-end
-
-get "/img/*" do
-	send_file File.expand_path(File.dirname(__FILE__) + "/../img/#{params["splat"].join}")
-end
-
-get "/fonts/*" do
-	send_file File.expand_path(File.dirname(__FILE__) + "/../fonts/#{params["splat"].join}")
-end
-
 # ############## #
 # API END POINTS #
 # ############## #
 
 # hostname:1234/all
 # Get all open PRs
-get '/all' do
+get '/api/all' do
 	content_type :json
 	headers 'Access-Control-Allow-Origin' => '*'
 
@@ -56,7 +36,7 @@ get '/all' do
 	return pr_data.to_json
 end
 
-get '/all/:owner/:repo' do
+get '/:owner/:repo/api/all' do
 	content_type :json
 	headers 'Access-Control-Allow-Origin' => '*'
 
@@ -70,7 +50,7 @@ end
 
 # hostname:1234/pull/owner_name/project_name/123
 # Gets PR #123 from "project_name" repository owned by "owner_name"
-get '/pull/:owner/:repo/:number' do
+get '/api/pull/:owner/:repo/:number' do
 	content_type :json
 	headers 'Access-Control-Allow-Origin' => '*'
 
@@ -85,7 +65,7 @@ end
 # Gets PRs:
 # - #123 from "project_name" repository owned by "owner_name",
 # - #456 from "project_name" repository owned by "owner_name"
-get '/pulls' do
+get '/api/pulls' do
 	headers 'Access-Control-Allow-Origin' => '*'
 	content_type :json
 
@@ -104,7 +84,7 @@ get '/pulls' do
 	return pr_data.to_json
 end
 
-get "/cache" do
+get "/api/cache" do
 	headers 'Access-Control-Allow-Origin' => '*'
 	content_type :json
 
@@ -115,9 +95,31 @@ get "/cache" do
 	return cache.to_json
 end
 
-get "/test" do
+get "/api/test" do
 	headers 'Access-Control-Allow-Origin' => '*'
 	"HELLO WORLD"
+end
+
+# ########### #
+# SERVE FILES #
+# ########### #
+
+["", "index.html"].each do |path|
+	get "/#{path}" do
+		send_file File.expand_path(File.dirname(__FILE__) + '/../index.html')
+	end
+
+	get "/:name/:owner/#{path}" do
+		send_file File.expand_path(File.dirname(__FILE__) + '/../index.html')
+	end
+end
+
+["/js", "/img", "/fonts"].each do |dir|
+	["#{dir}/*", "/:owner/:name#{dir}/*"].each do |path|
+		get path do
+			send_file File.expand_path(File.dirname(__FILE__) + "/../#{dir}/#{params["splat"].join}")
+		end
+	end
 end
 
 def get_repository_by_owner_and_name(repos, owner, name)
