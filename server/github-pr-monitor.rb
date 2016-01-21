@@ -56,6 +56,18 @@ get '/all' do
 	return pr_data.to_json
 end
 
+get '/all/:owner/:repo' do
+	content_type :json
+	headers 'Access-Control-Allow-Origin' => '*'
+
+	pr_data = []
+	repo = get_repository_by_owner_and_name(pr_activities, params["owner"], params["repo"])
+	if !repo.nil?
+		pr_data = repo.fetch_all_open_pull_requests
+	end
+	return pr_data.to_json
+end
+
 # hostname:1234/pull/owner_name/project_name/123
 # Gets PR #123 from "project_name" repository owned by "owner_name"
 get '/pull/:owner/:repo/:number' do
