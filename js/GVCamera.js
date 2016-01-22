@@ -6,21 +6,20 @@ function GVCamera(context, defaultFollowObj){
 	this.center = new Vector(0,0);
 	this.defaultFollowObj = defaultFollowObj;
 	this.followObj = null;
+	this.ignoreFollow = false;
+	this.ignoreFollowTimeoutID = null;
+	this.highlightPoint = null;
+	this.highlightSize = 3;
 	this.drawObjects = [];
 
 	window.onresize = this.onresize.bind(this);
 	this.onresize();
-	this.setRandomColour();
 
 	this.shadowColour = "rgba(0, 0, 0, 0.15)";
 	this.shadowDistance = 4;
 
 	this.bgColour = GVConfig.bg_colour || "#FFFF99";
 }
-
-GVCamera.prototype.setRandomColour = function() {
-	this.textStyle = (["#ef3742", "#37ef42", "#3742ef"])[Math.floor(Math.random() * 3)];
-};
 
 GVCamera.prototype.onresize = function() {
 	this.width = this.context.canvas.width = window.innerWidth;
@@ -56,18 +55,56 @@ GVCamera.prototype.removeObject = function(obj) {
 	}
 };
 
-GVCamera.prototype.setFollowObject = function(obj, forceFollow) {
-	this.followObj = obj;
-	if (forceFollow) {
-		this.center = obj.pos.clone();
+GVCamera.prototype.setFollowObject = function(obj, userInput, lookAt) {
+	if (obj) {
+		if (userInput || !this.ignoreFollow){
+			this.followObj = obj;
+			if (lookAt) {
+				this.center = obj.pos.clone();
+			}
+
+			if (this.followObj.type == GVRepo) {
+				this.followStrength = 0.07;
+				this.setFollowInterval(3000);
+			}
+			else if (this.followObj.type == GVBall || this.followObj.type == GVBoid) {
+				this.followStrength = 0.08;
+				this.setFollowInterval(8000);
+			}
+		}
 	}
-	this.setRandomColour();
+};
+
+// Force the camera to follow something for a certain time period
+GVCamera.prototype.setFollowInterval = function(interval) {
+	window.clearTimeout(this.ignoreFollowTimeoutID);
+	this.ignoreFollow = true;
+
+	this.ignoreFollowTimeoutID = setTimeout((function() {
+		this.ignoreFollow = false;
+		this.ignoreFollowTimeoutID = null;
+	}).bind(this), interval);
 };
 
 GVCamera.prototype.lookAt = function(pos) {
 	this.center.x = pos.x;
 	this.center.y = pos.y;
 }
+
+GVCamera.prototype.setHighlightPoint = function(point) {
+	this.highlightPoint = point;
+};
+
+GVCamera.prototype.getObjectAt = function(x, y) {
+	var worldPos = this.convertCameraToWorldSpace(x, y);
+	var objectAt = null;
+	for (var i = 0; i < this.drawObjects.length; i++) {
+		if (worldPos.sub(this.drawObjects[i].pos).mag() < this.drawObjects[i].size) {
+			objectAt = this.drawObjects[i];
+		}
+	};
+	return objectAt;
+};
 
 GVCamera.prototype.draw = function() {
 	// this.context.clearRect(0, 0, this.width, this.height);
@@ -87,12 +124,30 @@ GVCamera.prototype.draw = function() {
 		this.context.restore();
 	};
 
+	var highlightFound = false;
 	for (var i = 0; i < this.drawObjects.length; i++) {
+		var highlight = false;
+		if (this.highlightPoint) {
+			var highlightWorldPoint = this.convertCameraToWorldSpace(this.highlightPoint.x, this.highlightPoint.y);
+			if (highlightWorldPoint.sub(this.drawObjects[i].pos).mag() < this.drawObjects[i].size) {
+				highlight = true;
+				highlightFound = true;
+				this.drawObjects[i].size += this.highlightSize;
+			}
+		}
+
 		this.context.save();
 		this.context.translate(this.drawObjects[i].pos.x - follow.x, this.drawObjects[i].pos.y - follow.y)
 		this.drawObjects[i].draw();
 		this.context.restore();
+
+		if (highlight) {
+			highlight = false;
+			this.drawObjects[i].size -= this.highlightSize;
+		}
 	};
+
+	this.context.canvas.style.cursor = (highlightFound) ? "pointer" : "default";
 
 	if (this.followObj) {
 		this.context.font = "20px GothamSsm";
@@ -109,7 +164,7 @@ GVCamera.prototype.draw = function() {
 		this.context.fillRect(left - 10, top - 10, width + 20, 40);
 
 		this.context.textBaseline = "hanging";
-		this.context.fillStyle = (this.followObj.colour == "#FFFFFF") ? "#000000" : this.followObj.colour;
+		this.context.fillStyle = (!this.followObj.colour || this.followObj.colour == "#FFFFFF") ? "#000000" : this.followObj.colour;
 		this.context.fillText(text, left, this.height - 100);
 	}
 

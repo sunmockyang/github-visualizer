@@ -18,7 +18,6 @@ function GithubVisualizer(canvas){
 	this.drops = [];
 	this.boids = [];
 	this.particles = [];
-	this.camera.setFollowObject(this.mainRepo, true);
 
 	this.client = new GVClient(this.drops, this.boids, this.setMainBallAttr.bind(this), this.createBall.bind(this), this.mergeBall.bind(this), this.setBallAttributes.bind(this), this.createBoid.bind(this));
 
@@ -28,13 +27,13 @@ function GithubVisualizer(canvas){
 	}).bind(this);
 	this.addObject(this.logo, true);
 
-	this.camera.setFollowObject(this.mainRepo, true);
+	this.camera.setFollowObject(this.mainRepo, false, true);
 
 	// Setup input
 	this.mouse = new LibraryMouse(this.canvas);
 	this.mouse.addEventListener("mousemove", this.onMouseMove.bind(this));
 	this.mouse.addEventListener("mouseover", function(){});
-	this.mouse.addEventListener("mouseout", function(){});
+	this.mouse.addEventListener("mouseout", this.onMouseOut.bind(this));
 	this.mouse.addEventListener("mousedown", function(){});
 	this.mouse.addEventListener("mouseup", function(){});
 	this.mouse.addEventListener("click", this.onMouseClick.bind(this));
@@ -132,15 +131,12 @@ GithubVisualizer.prototype.setRandomCameraFollow = function() {
 		this.drops.length == 0 || drop.size < 1 ||
 		this.boids.length == 0 || (boid.follow && boid.follow.size < 1)) {
 		this.camera.setFollowObject(this.mainRepo);
-		this.camera.followStrength = 0.07;
 	}
 	else if (Math.random() > 0.5) {
 		this.camera.setFollowObject(drop);
-		this.camera.followStrength = 0.08;
 	}
 	else {
 		this.camera.setFollowObject(boid);
-		this.camera.followStrength = 0.08;
 	}
 };
 
@@ -202,7 +198,7 @@ GithubVisualizer.prototype.update = function() {
 	this.logo.pos.x = this.mainRepo.pos.x - this.logo.getSize().width/2;
 	this.logo.pos.y = this.mainRepo.pos.y - this.logo.getSize().height/2;
 
-	if (Math.random() < 0.001 || !this.camera.followObj) {
+	if (Math.random() < 0.01 || !this.camera.followObj) {
 		this.setRandomCameraFollow();
 	}
 };
@@ -218,9 +214,17 @@ window.requestAnimationFrame = window.requestAnimationFrame ||
 	window.msRequestAnimationFrame;
 
 // Event handlers
-GithubVisualizer.prototype.onMouseMove = function() {};
+GithubVisualizer.prototype.onMouseMove = function() {
+	this.camera.setHighlightPoint(new Vector(this.mouse.x, this.mouse.y));
+};
 
-GithubVisualizer.prototype.onMouseClick = function() {};
+GithubVisualizer.prototype.onMouseClick = function() {
+	this.camera.setFollowObject(this.camera.getObjectAt(this.mouse.x, this.mouse.y), true);
+};
+
+GithubVisualizer.prototype.onMouseOut = function() {
+	this.camera.setHighlightPoint(null);
+}
 
 function GVObject () {
 	this.context = null;
@@ -229,6 +233,7 @@ function GVObject () {
 	this.pos = new Vector();
 	this.name = "random object";
 	this.colour = "#000000";
+	this.type = GVObject;
 
 	this.getName = function() {
 		return this.name;

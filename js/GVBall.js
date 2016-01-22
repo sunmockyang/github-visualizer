@@ -1,6 +1,7 @@
 // Optional set by input - id, status, colour, size
 
 function GVBall(world, x, y, mainRepo, attr) {
+	this.type = GVBall;
 	this.size = 0;
 	this.mainRepo = mainRepo;
 	this.id = "0";

@@ -1,4 +1,5 @@
 function GVBoid(x, y, follow, others, attr) {
+	this.type = GVBoid;
 	this.size = 10;
 	this.others = others;
 	this.follow = follow;

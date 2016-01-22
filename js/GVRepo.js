@@ -1,4 +1,5 @@
 function GVRepo(){
+	this.type = GVRepo;
 	this.size = 200;
 	this.gravity = 100;
 	this.repelDist = this.size + 175;
