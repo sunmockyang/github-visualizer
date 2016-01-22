@@ -10,6 +10,7 @@ function GVBoid(x, y, follow, others, attr) {
 	this.rotate = 0;
 	this.colour = '#559999';
 	this.name = "Comment";
+	this.url = "";
 	this.id = 0;
 	this.timeCreated = Date.now();
 	this.setAttributes(attr);
@@ -31,6 +32,7 @@ GVBoid.prototype.setAttributes = function(attr) {
 	this.name = (attr.username) ? attr.username : this.name;
 	this.id = (attr.id) ? attr.id : this.id;
 	this.timeCreated = Date.parse((attr.timeCreated) ? attr.timeCreated : this.timeCreated);
+	this.url = (attr.url) ? attr.url : this.url;
 };
 
 GVBoid.prototype.update = function() {

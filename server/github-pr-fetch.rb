@@ -89,6 +89,7 @@ class GithubPRDataModel
 				name: pr["number"].to_i,
 				state: pr["state"],
 				colour: @pr_colour,
+				url: pr["html_url"],
 				comments: nil
 			}
 		end
@@ -98,6 +99,7 @@ class GithubPRDataModel
 				username: comment["user"]["login"],
 				id: comment["id"],
 				timeCreated: comment["created_at"],
+				url: comment["html_url"],
 				colour: @comment_colour
 			}
 		end

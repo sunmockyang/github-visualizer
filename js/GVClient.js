@@ -21,7 +21,7 @@ function GVClient (ballList, boidList, setMainBallAttr, createBall, mergeBall, s
 
 	this.update();
 
-	document.onkeypress = this.keyPress.bind(this);
+	// document.onkeypress = this.keyPress.bind(this);
 }
 
 // Image displayed in the center of the big circle

@@ -7,6 +7,7 @@ function GVBall(world, x, y, mainRepo, attr) {
 	this.id = "0";
 	this.name = "0";
 	this.status = "open";
+	this.url = "";
 	this.world = world;
 	this.repo = {"owner": "", "name": ""};
 	this.boids = [];
@@ -65,6 +66,7 @@ GVBall.prototype.setAttributes = function(attr) {
 	this.status = (attr.status) ? attr.status : this.status;
 	this.colour = (attr.colour) ? attr.colour : this.colour;
 	this.repo = (attr.repo) ? attr.repo : this.repo
+	this.url = (attr.url) ? attr.url : this.url;
 
 	if (attr.size && attr.size != this.size) {
 		this.size = attr.size;

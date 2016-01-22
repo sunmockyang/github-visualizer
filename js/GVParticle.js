@@ -1,6 +1,7 @@
 var ParticleIndex = 0;
 
 function GVParticle(x, y, type, color) {
+	this.type = GVParticle;
 	this.pos = new Vector(x, y);
 	this.birthOrDeath = type;
 

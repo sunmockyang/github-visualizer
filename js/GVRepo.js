@@ -7,6 +7,7 @@ function GVRepo(){
 	this.floatStrength = 50000000;
 	this.owner = GVConfig.owner || "My";
 	this.name = GVConfig.repository || "Awesome";
+	this.url = GVConfig.repo_url;
 
 	this.accel = new Vector(0, 0);
 	this.speed = new Vector(0,0);

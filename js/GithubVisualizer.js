@@ -37,6 +37,9 @@ function GithubVisualizer(canvas){
 	this.mouse.addEventListener("mousedown", function(){});
 	this.mouse.addEventListener("mouseup", function(){});
 	this.mouse.addEventListener("click", this.onMouseClick.bind(this));
+	this.mouse.addEventListener("doubleclick", function(){});
+
+	document.onkeypress = this.keyPress.bind(this);
 
 	this.run();
 };
@@ -148,6 +151,12 @@ GithubVisualizer.prototype.addObject = function(obj, front) {
 	}
 };
 
+GithubVisualizer.prototype.openLink = function(url) {
+	if (url) {
+		window.open(url, '_blank');
+	}
+};
+
 GithubVisualizer.prototype.update = function() {
 	this.mainRepo.update();
 
@@ -225,6 +234,19 @@ GithubVisualizer.prototype.onMouseClick = function() {
 GithubVisualizer.prototype.onMouseOut = function() {
 	this.camera.setHighlightPoint(null);
 }
+
+GithubVisualizer.prototype.keyPress = function(e) {
+	e = e || window.event;
+	var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
+	if (charCode) {
+		// enter
+		if (charCode == 13){
+			if (this.camera.followObj) {
+				this.openLink(this.camera.followObj.url);
+			}
+		}
+	}
+};
 
 function GVObject () {
 	this.context = null;
