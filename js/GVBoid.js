@@ -7,9 +7,13 @@ function GVBoid(x, y, follow, others, attr) {
 	this.otherAttractDist = 40;
 	this.otherAverageDist = 20;
 	this.rotate = 0;
-	this.colour = (attr.colour) ? attr.colour : '#559999';
-	this.name = (attr.username) ? attr.username : "Comment";
-	this.id = (attr.id) ? attr.id : 0
+	this.colour = '#559999';
+	this.name = "Comment";
+	this.id = 0;
+	this.timeCreated = Date.now();
+	this.setAttributes(attr);
+
+	this.follow.addFollower(this);
 
 	this.pos = new Vector(x, y);
 	this.speed = new Vector(Math.random() * 20 - 10, Math.random() * 20 - 10);
@@ -20,6 +24,13 @@ function GVBoid(x, y, follow, others, attr) {
 GVBoid.prototype = new GVObject();
 GVBoid.prototype.FRICTION_STRENGTH = 0.95;
 GVBoid.prototype.MAX_SPEED = 200;
+
+GVBoid.prototype.setAttributes = function(attr) {
+	this.colour = (attr.colour) ? attr.colour : this.colour;
+	this.name = (attr.username) ? attr.username : this.name;
+	this.id = (attr.id) ? attr.id : this.id;
+	this.timeCreated = Date.parse((attr.timeCreated) ? attr.timeCreated : this.timeCreated);
+};
 
 GVBoid.prototype.update = function() {
 	if (this.follow && this.follow.size > 0.05){

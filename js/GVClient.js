@@ -17,7 +17,7 @@ function GVClient (ballList, boidList, setMainBallAttr, createBall, mergeBall, s
 	this.boidList = boidList;
 
 	// Set to 30 seconds
-	this.checkInterval = 30 * 1000;
+	this.checkInterval = 5 * 1000;
 
 	this.update();
 
@@ -46,13 +46,15 @@ GVClient.prototype.update = function() {
 };
 
 GVClient.prototype.parse_request = function(response) {
+	// console.log(response)
 	dataPackage = JSON.parse(response);
 
 	// Keep track of which has no status
 	var mergedBallList = this.ballList.slice();
 
 	for (var i = 0; i < dataPackage.length; i++) {
-		if (this.PRExists(dataPackage[i])){
+		var pr = this.getPRByID(dataPackage[i])
+		if (pr){
 			if (dataPackage[i].state == "open"){
 				// If a ball has status "open" it is removed from the merged ball list
 				var j;
@@ -68,14 +70,22 @@ GVClient.prototype.parse_request = function(response) {
 			}
 		}
 		else {
-			this.createBall(dataPackage[i]);
+			pr = this.createBall(dataPackage[i]);
 		}
 
 		for (var j = 0; j < dataPackage[i].comments.length; j++) {
-			if (!this.CommentExists(dataPackage[i].comments[j].id)){
+			var comment = this.getCommentByID(dataPackage[i].comments[j].id);
+			if (comment){
+				comment.setAttributes(dataPackage[i].comments[j]);
+			}
+			else {	
 				this.createBoid(dataPackage[i].id, dataPackage[i].comments[j]);
 			}
 		};
+
+		if (pr) {
+			pr.calculateSize();
+		}
 	};
 
 	// Merge all balls that did not receive a response
@@ -84,22 +94,22 @@ GVClient.prototype.parse_request = function(response) {
 	};
 };
 
-GVClient.prototype.PRExists = function(attr) {
+GVClient.prototype.getPRByID = function(attr) {
 	for (var i = 0; i < this.ballList.length; i++) {
 		if (this.ballList[i].id == attr.id) {
-			return true;
+			return this.ballList[i];
 		};
 	};
-	return false;
+	return null;
 };
 
-GVClient.prototype.CommentExists = function(number) {
+GVClient.prototype.getCommentByID = function(number) {
 	for (var i = 0; i < this.boidList.length; i++) {
 		if (this.boidList[i].id == number) {
-			return true;
+			return this.boidList[i];
 		};
 	};
-	return false;
+	return null;
 };
 
 function PullRequestNameFunction() {

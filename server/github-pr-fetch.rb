@@ -97,6 +97,7 @@ class GithubPRDataModel
 			return {
 				username: comment["user"]["login"],
 				id: comment["id"],
+				timeCreated: comment["created_at"],
 				colour: @comment_colour
 			}
 		end

@@ -7,7 +7,8 @@ function GVBall(world, x, y, mainRepo, attr) {
 	this.name = "0";
 	this.status = "open";
 	this.world = world;
-	this.repo = {"owner": "", "name": ""}
+	this.repo = {"owner": "", "name": ""};
+	this.boids = [];
 
 	this.accel = new Vector(0, 0);
 	this.speed = new Vector(0,0);
@@ -64,21 +65,57 @@ GVBall.prototype.setAttributes = function(attr) {
 	this.colour = (attr.colour) ? attr.colour : this.colour;
 	this.repo = (attr.repo) ? attr.repo : this.repo
 
-	if (attr.size) {
+	if (attr.size && attr.size != this.size) {
 		this.size = attr.size;
 		this.shape = new b2CircleDef();
 		this.shape.density = 0.05;
-		this.shape.radius = this.size;
+		this.shape.radius = attr.size;
 		this.shape.restitution = 0.1;
 		this.shape.friction = 10;
 
 		this.bodyDef = new b2BodyDef();
 		this.bodyDef.AddShape(this.shape);
 		this.bodyDef.position.Set(this.pos.x,this.pos.y);
+		var velocity = this.body.GetLinearVelocity();
 
 		this.world.DestroyBody(this.body);
 		this.body = this.world.CreateBody(this.bodyDef);
+		this.body.SetLinearVelocity(velocity);
 	}
+};
+
+GVBall.prototype.addFollower = function(follower) {
+	this.boids.push(follower);
+};
+
+GVBall.prototype.calculateSize = function() {
+	// Get average age of last few commits, size accordingly
+	var boidLimit = 5;
+	var boidAge = 0;
+
+	var minAge = 1000 * 60 * 30; // 30 minutes
+	var maxAge = 1000 * 60 * 60 * 24 * 7; // 1 week
+
+	this.boids.sort(function (a, b) {
+		return a.timeCreated - b.timeCreated;
+	});
+
+	var i = 0;
+	for (; i < boidLimit; i++) {
+		if (i < this.boids.length) {
+			boidAge += Date.now() - this.boids[i].timeCreated;
+		}
+		else {
+			boidAge += (maxAge - minAge) / 2 + minAge;
+		}
+	};
+	boidAge /= boidLimit;
+
+	boidAge = Mathx.clamp(boidAge, minAge, maxAge);
+	boidAge = 1 - (boidAge - minAge) / (maxAge - minAge); // convert to percent (0 - 1)
+	var size = boidAge * 20 + 15;
+
+	this.setAttributes({size: size});
 };
 
 GVBall.prototype.setInput = function(x, y) {

@@ -153,3 +153,7 @@ Mathx.Deg2Rad = function(deg) {
 Mathx.Rad2Deg = function(rad) {
 	return rad * (180 / Math.PI);
 };
+
+Mathx.clamp = function(value, min, max) {
+	return Math.min(max, Math.max(min, value));
+}
